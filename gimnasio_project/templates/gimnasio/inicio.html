@@ -1,0 +1,25 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Inicio - TrainUp{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <i class="bi bi-heart-pulse-fill" style="font-size: 6rem; color: #FF6B35;"></i>
+    <h1 class="display-3 mt-4">Bienvenido a TrainUp</h1>
+    <p class="lead text-muted mb-4">Tu gimnasio, ahora más cerca que nunca</p>
+    
+    {% if user.is_authenticated %}
+        <h2>¡Hola, {{ user.username }}!</h2>
+        <a href="{% url 'gimnasio:logout' %}" class="btn btn-primary btn-lg">Cerrar Sesión</a>
+    {% else %}
+        <div class="mb-4">
+            <a href="{% url 'gimnasio:registro' %}" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-person-plus"></i> Únete Ahora
+            </a>
+            <a href="{% url 'gimnasio:login' %}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
