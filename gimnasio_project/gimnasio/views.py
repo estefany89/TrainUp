@@ -867,6 +867,161 @@ class EstadisticasView(View):
         return render(request, 'gimnasio/estadisticas.html', context)
 
 
+# ============================================
+# ADMIN - ASIGNAR CLASES A MONITORES
+# ============================================
+@method_decorator([login_required, admin_required], name='dispatch')
+class AsignarClasesMonitorView(View):
+    def get(self, request):
+        monitores = Monitor.objects.filter(activo=True)
+        clases = Clase.objects.filter(activa=True).order_by('dia_semana', 'hora_inicio')
+
+        context = {
+            'monitores': monitores,
+            'clases': clases
+        }
+        return render(request, 'gimnasio/asignar_clases_monitor.html', context)
+
+    def post(self, request):
+        clase_id = request.POST.get('clase_id')
+        monitor_id = request.POST.get('monitor_id')
+
+        clase = get_object_or_404(Clase, pk=clase_id)
+
+        if monitor_id:
+            monitor = get_object_or_404(Monitor, pk=monitor_id)
+            clase.monitor = monitor
+            clase.save()
+            messages.success(request, f'Clase "{clase.nombre}" asignada a {monitor.nombre_completo()}')
+        else:
+            clase.monitor = None
+            clase.save()
+            messages.info(request, f'Monitor removido de la clase "{clase.nombre}"')
+
+        return redirect('gimnasio:asignar_clases_monitor')
+
+
+# ============================================
+# ADMIN - VER CLASES RESERVADAS
+# ============================================
+@method_decorator([login_required, admin_required], name='dispatch')
+class ClasesReservadasAdminView(View):
+    def get(self, request):
+        # Obtener todas las reservas activas
+        reservas = Reserva.objects.filter(
+            cancelada=False,
+            fecha__gte=timezone.now().date()
+        ).select_related('socio', 'clase', 'clase__monitor').order_by('fecha', 'clase__hora_inicio')
+
+        # Filtros opcionales
+        clase_id = request.GET.get('clase')
+        fecha = request.GET.get('fecha')
+
+        if clase_id:
+            reservas = reservas.filter(clase_id=clase_id)
+        if fecha:
+            reservas = reservas.filter(fecha=fecha)
+
+        clases = Clase.objects.filter(activa=True)
+
+        context = {
+            'reservas': reservas,
+            'clases': clases
+        }
+        return render(request, 'gimnasio/clases_reservadas_admin.html', context)
+
+
+# ============================================
+# MONITOR - MIS CLASES ASIGNADAS
+# ============================================
+@method_decorator(login_required, name='dispatch')
+class MisClasesMonitorView(View):
+    def get(self, request):
+        # Verificar que sea monitor
+        if request.user.perfil.rol != 'monitor':
+            messages.error(request, 'No tienes permisos para acceder a esta página.')
+            return redirect('gimnasio:inicio')
+
+        # Obtener el monitor asociado al usuario
+        try:
+            monitor = Monitor.objects.get(email=request.user.email)
+            mis_clases = Clase.objects.filter(
+                monitor=monitor,
+                activa=True
+            ).order_by('dia_semana', 'hora_inicio')
+
+            # Para cada clase, contar reservas
+            clases_con_info = []
+            hoy = timezone.now().date()
+
+            for clase in mis_clases:
+                total_reservas = Reserva.objects.filter(
+                    clase=clase,
+                    cancelada=False,
+                    fecha__gte=hoy
+                ).count()
+
+                clases_con_info.append({
+                    'clase': clase,
+                    'total_reservas': total_reservas,
+                    'plazas_libres': clase.capacidad_maxima - total_reservas
+                })
+
+            context = {
+                'monitor': monitor,
+                'clases_con_info': clases_con_info
+            }
+
+            return render(request, 'gimnasio/mis_clases_monitor.html', context)
+
+        except Monitor.DoesNotExist:
+            messages.error(request, 'No se encontró tu perfil de monitor. Contacta al administrador.')
+            return redirect('gimnasio:inicio')
+
+
+# ============================================
+# MONITOR - SOCIOS APUNTADOS A MIS CLASES
+# ============================================
+@method_decorator(login_required, name='dispatch')
+class SociosApuntadosView(View):
+    def get(self, request):
+        # Verificar que sea monitor
+        if request.user.perfil.rol != 'monitor':
+            messages.error(request, 'No tienes permisos para acceder a esta página.')
+            return redirect('gimnasio:inicio')
+
+        try:
+            monitor = Monitor.objects.get(email=request.user.email)
+
+            # Obtener todas las clases del monitor
+            mis_clases = Clase.objects.filter(monitor=monitor, activa=True)
+
+            # Obtener reservas futuras de esas clases
+            hoy = timezone.now().date()
+            reservas = Reserva.objects.filter(
+                clase__in=mis_clases,
+                cancelada=False,
+                fecha__gte=hoy
+            ).select_related('socio', 'clase').order_by('fecha', 'clase__hora_inicio')
+
+            # Filtro por clase
+            clase_id = request.GET.get('clase')
+            if clase_id:
+                reservas = reservas.filter(clase_id=clase_id)
+
+            context = {
+                'monitor': monitor,
+                'reservas': reservas,
+                'mis_clases': mis_clases
+            }
+
+            return render(request, 'gimnasio/socios_apuntados.html', context)
+
+        except Monitor.DoesNotExist:
+            messages.error(request, 'No se encontró tu perfil de monitor. Contacta al administrador.')
+            return redirect('gimnasio:inicio')
+
+
 @method_decorator([login_required, admin_required], name='dispatch')
 class ReportesView(View):
     def get(self, request):

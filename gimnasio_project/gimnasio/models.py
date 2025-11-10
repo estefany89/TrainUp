@@ -13,6 +13,7 @@ from django.core.validators import MinValueValidator
 class PerfilUsuario(models.Model):
     ROLES = (
         ('admin', 'Administrador'),
+        ('monitor', 'Monitor'),
         ('socio', 'Socio'),
     )
 

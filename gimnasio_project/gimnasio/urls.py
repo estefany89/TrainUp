@@ -51,7 +51,18 @@ urlpatterns = [
     path('admin/pagos/nuevo/', views.NuevoPagoView.as_view(), name='nuevo_pago'),
     path('admin/pagos/<int:pk>/marcar-pagado/', views.MarcarPagadoView.as_view(), name='marcar_pagado'),
 
+    # ===== ADMIN - ASIGNAR CLASES A MONITORES =====
+    path('admin/asignar-clases/', views.AsignarClasesMonitorView.as_view(), name='asignar_clases_monitor'),
+    path('admin/clases-reservadas/', views.ClasesReservadasAdminView.as_view(), name='clases_reservadas'),
+
+    # ===== MONITOR - SUS CLASES =====
+    path('monitor/mis-clases/', views.MisClasesMonitorView.as_view(), name='mis_clases_monitor'),
+    path('monitor/socios-apuntados/', views.SociosApuntadosView.as_view(), name='socios_apuntados'),
+
     # ===== ESTADÍSTICAS (ADMIN) =====
     path('estadisticas/', views.EstadisticasView.as_view(), name='estadisticas'),
     path('reportes/', views.ReportesView.as_view(), name='reportes'),
+
+
 ]
+
