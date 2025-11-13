@@ -18,10 +18,13 @@ urlpatterns = [
 
     # ===== MONITORES =====
     path('monitores/', views.ListadoMonitoresView.as_view(), name='listado_monitores'),
-    path('monitores/nuevo/', views.NuevoMonitorView.as_view(), name='nuevo_monitor'),
+    path('monitores/gestion/', views.GestionMonitoresView.as_view(), name='gestion_monitores'),
     path('monitores/<int:pk>/', views.DetalleMonitorView.as_view(), name='detalle_monitor'),
     path('monitores/<int:pk>/editar/', views.EditarMonitorView.as_view(), name='editar_monitor'),
-    path('monitores/<int:pk>/eliminar/', views.EliminarMonitorView.as_view(), name='eliminar_monitor'),
+    path('monitores/<int:pk>/alternar/', views.AlternarEstadoMonitorView.as_view(), name='alternar_monitor'),
+    path('monitores/borrar/<int:pk>/', views.BorrarMonitorView.as_view(), name='borrar_monitor'),
+
+
 
     # ===== CLASES =====
     path('clases/', views.ListadoClasesView.as_view(), name='listado_clases'),
