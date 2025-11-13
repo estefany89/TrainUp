@@ -43,11 +43,11 @@ urlpatterns = [
     path('pagos/', views.MisPagosView.as_view(), name='mis_pagos'),
     path('pagos/<int:pk>/', views.DetallePagoView.as_view(), name='detalle_pago'),
 
-    # ===== GESTIÓN USUARIOS (ADMIN) =====
-    path('usuarios/', views.GestionUsuariosView.as_view(), name='gestion_usuarios'),
-    path('usuarios/nuevo/', views.NuevoUsuarioView.as_view(), name='nuevo_usuario'),
-    path('usuarios/<int:pk>/editar/', views.EditarUsuarioView.as_view(), name='editar_usuario'),
-    path('usuarios/<int:pk>/desactivar/', views.DesactivarUsuarioView.as_view(), name='desactivar_usuario'),
+    # ===== GESTIÓN SOCIOS (ADMIN) =====
+    path('usuarios/', views.GestionSocioView.as_view(), name='gestion_usuarios'),
+    path('usuarios/nuevo/', views.NuevoSocioView.as_view(), name='nuevo_usuario'),
+    path('usuarios/<int:pk>/editar/', views.EditarSocioView.as_view(), name='editar_usuario'),
+    path('usuarios/<int:pk>/desactivar/', views.DesactivarSocioView.as_view(), name='desactivar_usuario'),
 
     # ===== GESTIÓN PAGOS (ADMIN) =====
     path('admin/pagos/', views.GestionPagosView.as_view(), name='gestion_pagos'),

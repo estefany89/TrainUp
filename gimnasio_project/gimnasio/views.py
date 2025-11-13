@@ -625,7 +625,7 @@ class CancelarReservaView(View):
         return redirect('gimnasio:mis_reservas')
 
 
-# CONTINÚA views.py - PARTE 3: PAGOS Y GESTIÓN DE USUARIOS
+# PAGOS Y GESTIÓN DE USUARIOS
 
 # ============================================
 # PAGOS (VISTA SOCIO)
@@ -662,10 +662,10 @@ class DetallePagoView(DetailView):
 # GESTIÓN DE USUARIOS (ADMIN)
 # ============================================
 @method_decorator([login_required, admin_required], name='dispatch')
-class GestionUsuariosView(ListView):
+class GestionSocioView(ListView):
     model = PerfilUsuario
-    template_name = 'gimnasio/gestion_usuarios.html'
-    context_object_name = 'usuarios'
+    template_name = 'gimnasio/gestion_socios.html'
+    context_object_name = 'socios'
     paginate_by = 20
 
     def get_queryset(self):
@@ -692,9 +692,9 @@ class GestionUsuariosView(ListView):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class NuevoUsuarioView(View):
+class NuevoSocioView(View):
     def get(self, request):
-        return render(request, 'gimnasio/nuevo_usuario.html')
+        return render(request, 'gimnasio/nuevo_socio.html')
 
     def post(self, request):
         username = request.POST.get('username')
@@ -709,11 +709,11 @@ class NuevoUsuarioView(View):
         # Validaciones
         if User.objects.filter(username=username).exists():
             messages.error(request, 'El nombre de usuario ya existe.')
-            return render(request, 'gimnasio/nuevo_usuario.html')
+            return render(request, 'gimnasio/nuevo_socio.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'El email ya está registrado.')
-            return render(request, 'gimnasio/nuevo_usuario.html')
+            return render(request, 'gimnasio/nuevo_socio.html')
 
         # Crear usuario
         user = User.objects.create(
@@ -737,7 +737,7 @@ class NuevoUsuarioView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class EditarUsuarioView(View):
+class EditarSocioView(View):
     def get(self, request, pk):
         perfil = get_object_or_404(PerfilUsuario, pk=pk)
         return render(request, 'gimnasio/editar_usuario.html', {'perfil': perfil})
@@ -762,7 +762,7 @@ class EditarUsuarioView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class DesactivarUsuarioView(View):
+class DesactivarSocioView(View):
     def post(self, request, pk):
         perfil = get_object_or_404(PerfilUsuario, pk=pk)
         perfil.activo = not perfil.activo

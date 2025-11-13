@@ -1,0 +1,71 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Gestión de Socios - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="bi bi-people"></i> Gestión de Socios</h1>
+        <p class="text-muted">Administra los socios del gimnasio</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'gimnasio:nuevo_usuario' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nuevo Socio
+        </a>
+    </div>
+</div>
+
+<!-- Lista de Socios -->
+<div class="row">
+    {% for socio in socios %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 {% if not socio.activo %}opacity-50{% endif %}">
+            <div class="card-header {% if socio.activo %}bg-success{% else %}bg-secondary{% endif %} text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ socio.user.get_full_name }}</h6>
+                    {% if socio.activo %}
+                        <span class="badge bg-light text-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-dark">Inactivo</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body">
+                <p class="mb-2">
+                    <i class="bi bi-envelope text-info"></i>
+                    <strong>Email:</strong> {{ socio.user.email }}
+                </p>
+                <p class="mb-2">
+                    <i class="bi bi-calendar text-secondary"></i>
+                    <strong>Registrado:</strong> {{ socio.fecha_registro|date:"d/m/Y" }}
+                </p>
+            </div>
+
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'gimnasio:editar_usuario' socio.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form method="post" action="{% url 'gimnasio:desactivar_usuario' socio.pk %}" class="flex-fill">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm w-100 {% if socio.activo %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                            onclick="return confirm('{% if socio.activo %}¿Desactivar{% else %}¿Activar{% endif %} este socio?')">
+                            <i class="bi {% if socio.activo %}bi-x-circle{% else %}bi-check-circle{% endif %}"></i>
+                            {% if socio.activo %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i>
+            No hay socios registrados. Haz clic en "Nuevo Socio" para crear uno.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
