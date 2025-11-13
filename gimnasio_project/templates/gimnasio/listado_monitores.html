@@ -1,0 +1,39 @@
+{% extends 'gimnasio/base.html' %}
+{% block title %}Listado de Monitores{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Listado de Monitores</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Email</th>
+                <th>Especialidad</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for monitor in monitores %}
+            <tr>
+                <td>{{ monitor.nombre }}</td>
+                <td>{{ monitor.apellidos }}</td>
+                <td>{{ monitor.email }}</td>
+                <td>{{ monitor.get_especialidad_display }}</td>
+                <td>
+                    <form method="post" action="{% url 'gimnasio:alternar_monitor' monitor.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if monitor.activo %}btn-secondary{% else %}btn-success{% endif %}">
+                            {% if monitor.activo %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No hay monitores registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'gimnasio:gestion_monitores' %}" class="btn btn-secondary">Gestión de Monitores</a>
+</div>
+{% endblock %}

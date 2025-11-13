@@ -1,0 +1,71 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Mis Clases - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-list-stars"></i> Mis Clases Asignadas</h1>
+        <p class="text-muted">Clases que tienes asignadas como monitor</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for item in clases_con_info %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ item.clase.nombre }}</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ item.clase.descripcion|truncatewords:15 }}</p>
+
+                <div class="mb-2">
+                    <i class="bi bi-calendar text-primary"></i>
+                    <strong>Día:</strong> {{ item.clase.get_dia_semana_display }}
+                </div>
+
+                <div class="mb-2">
+                    <i class="bi bi-clock text-info"></i>
+                    <strong>Hora:</strong> {{ item.clase.hora_inicio|time:"H:i" }}
+                </div>
+
+                <div class="mb-2">
+                    <i class="bi bi-hourglass text-warning"></i>
+                    <strong>Duración:</strong> {{ item.clase.duracion_minutos }} minutos
+                </div>
+
+                <div class="mb-2">
+                    <i class="bi bi-door-open text-secondary"></i>
+                    <strong>Sala:</strong> {{ item.clase.sala|default:"No especificada" }}
+                </div>
+
+                <hr>
+
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-success">{{ item.total_reservas }}</h4>
+                        <small>Reservas</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">{{ item.plazas_libres }}</h4>
+                        <small>Plazas Libres</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <span class="badge bg-info">{{ item.clase.get_nivel_display }}</span>
+                <span class="badge bg-secondary">Capacidad: {{ item.clase.capacidad_maxima }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i>
+            No tienes clases asignadas actualmente. Contacta al administrador.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

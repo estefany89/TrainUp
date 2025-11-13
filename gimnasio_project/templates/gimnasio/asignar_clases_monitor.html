@@ -1,0 +1,109 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Asignar Clases a Monitores - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-calendar-plus"></i> Asignar Clases a Monitores</h1>
+        <p class="text-muted">Gestiona qué monitor imparte cada clase</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Día</th>
+                        <th>Hora</th>
+                        <th>Duración</th>
+                        <th>Monitor Actual</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clase in clases %}
+                    <tr>
+                        <td><strong>{{ clase.nombre }}</strong></td>
+                        <td>{{ clase.get_dia_semana_display }}</td>
+                        <td>{{ clase.hora_inicio|time:"H:i" }}</td>
+                        <td>{{ clase.duracion_minutos }} min</td>
+                        <td>
+                            {% if clase.monitor %}
+                                <span class="badge bg-success">
+                                    {{ clase.monitor.nombre_completo }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">Sin asignar</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#asignarModal{{ clase.id }}">
+                                <i class="bi bi-pencil"></i> Asignar
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Modal para asignar monitor -->
+                    <div class="modal fade" id="asignarModal{{ clase.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Asignar Monitor - {{ clase.nombre }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <input type="hidden" name="clase_id" value="{{ clase.id }}">
+                                        
+                                        <div class="mb-3">
+                                            <label for="monitor{{ clase.id }}" class="form-label">
+                                                Seleccionar Monitor
+                                            </label>
+                                            <select class="form-select" name="monitor_id" id="monitor{{ clase.id }}">
+                                                <option value="">-- Sin monitor --</option>
+                                                {% for monitor in monitores %}
+                                                    <option value="{{ monitor.id }}" 
+                                                            {% if clase.monitor.id == monitor.id %}selected{% endif %}>
+                                                        {{ monitor.nombre_completo }} - {{ monitor.get_especialidad_display }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="alert alert-info">
+                                            <strong>Clase:</strong> {{ clase.nombre }}<br>
+                                            <strong>Horario:</strong> {{ clase.get_dia_semana_display }} {{ clase.hora_inicio|time:"H:i" }}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Asignar Monitor
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No hay clases disponibles
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
