@@ -237,11 +237,15 @@ class DetalleMonitorView(DetailView):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class NuevoMonitorView(View):
+class GestionMonitoresView(View):
     def get(self, request):
-        return render(request, 'gimnasio/nuevo_monitor.html')
+        monitores = Monitor.objects.all().order_by('-activo', 'apellidos', 'nombre')
+        return render(request, 'gimnasio/gestion_monitores.html', {'monitores': monitores})
 
     def post(self, request):
+        import random
+        import string
+
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
         dni = request.POST.get('dni')
@@ -253,12 +257,12 @@ class NuevoMonitorView(View):
         # Validar DNI único
         if Monitor.objects.filter(dni=dni).exists():
             messages.error(request, 'Ya existe un monitor con ese DNI.')
-            return render(request, 'gimnasio/nuevo_monitor.html')
+            return redirect('gimnasio:gestion_monitores')
 
         # Validar email único
         if Monitor.objects.filter(email=email).exists():
             messages.error(request, 'Ya existe un monitor con ese email.')
-            return render(request, 'gimnasio/nuevo_monitor.html')
+            return redirect('gimnasio:gestion_monitores')
 
         # Crear monitor
         monitor = Monitor.objects.create(
@@ -275,9 +279,40 @@ class NuevoMonitorView(View):
             monitor.foto = request.FILES['foto']
             monitor.save()
 
-        messages.success(request, 'Monitor creado correctamente.')
-        return redirect('gimnasio:listado_monitores')
+        # Crear usuario y perfil para el monitor
+        username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
+        if User.objects.filter(username=username).exists():
+            username = f"{username}{random.randint(1, 999)}"
 
+        # Generar contraseña aleatoria
+        password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+        user = User.objects.create(
+            username=username,
+            email=email,
+            password=make_password(password_generada),
+            first_name=nombre,
+            last_name=apellidos
+        )
+
+        PerfilUsuario.objects.create(
+            user=user,
+            telefono=telefono,
+            dni=dni,
+            rol='monitor'
+        )
+
+        # Enviar email de bienvenida
+        email_enviado = EmailService.enviar_bienvenida_monitor(monitor, password_generada, username)
+
+        if email_enviado:
+            messages.success(request,
+                             f'Monitor creado correctamente. Se ha enviado un email a {email} con las credenciales.')
+        else:
+            messages.warning(request,
+                             f'Monitor creado correctamente, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
+
+        return redirect('gimnasio:gestion_monitores')
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class EditarMonitorView(View):
@@ -305,17 +340,26 @@ class EditarMonitorView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class EliminarMonitorView(View):
+class AlternarEstadoMonitorView(View):
     def post(self, request, pk):
         monitor = get_object_or_404(Monitor, pk=pk)
-        monitor.activo = False
+        monitor.activo = not monitor.activo  # Alterna el estado
         monitor.save()
 
-        messages.success(request, 'Monitor desactivado correctamente.')
+        estado = "activado" if monitor.activo else "desactivado"
+        messages.success(request, f'Monitor {estado} correctamente.')
         return redirect('gimnasio:listado_monitores')
 
 
-# CONTINÚA views.py - PARTE 2: CLASES Y RESERVAS
+@method_decorator([login_required, admin_required], name='dispatch')
+class BorrarMonitorView(View):
+    def post(self, request, pk, *args, **kwargs):
+        monitor = get_object_or_404(Monitor, pk=pk)
+        nombre = monitor.nombre_completo
+        monitor.delete()
+        messages.error(request, f"El monitor {nombre} fue eliminado permanentemente.")
+        return redirect('gimnasio:gestion_monitores')
+
 
 # ============================================
 # CLASES
