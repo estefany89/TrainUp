@@ -1,0 +1,109 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Nueva Clase - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Crear Nueva Clase</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="nombre" class="form-label">Nombre de la Clase *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   placeholder="Ej: Yoga Avanzado" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="nivel" class="form-label">Nivel *</label>
+                            <select class="form-select" id="nivel" name="nivel" required>
+                                <option value="todos">Todos los niveles</option>
+                                <option value="principiante">Principiante</option>
+                                <option value="intermedio">Intermedio</option>
+                                <option value="avanzado">Avanzado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción *</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" 
+                                  placeholder="Describe en qué consiste la clase..." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="monitor" class="form-label">Monitor Asignado *</label>
+                            <select class="form-select" id="monitor" name="monitor" required>
+                                <option value="">-- Seleccionar Monitor --</option>
+                                {% for monitor in monitores %}
+                                    <option value="{{ monitor.id }}">
+                                        {{ monitor.nombre_completo }} - {{ monitor.get_especialidad_display }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sala" class="form-label">Sala</label>
+                            <input type="text" class="form-control" id="sala" name="sala" 
+                                   placeholder="Ej: Sala 1, Zona Cardio">
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong><i class="bi bi-calendar"></i> Horario de la Clase</strong>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="dia_semana" class="form-label">Día de la Semana *</label>
+                            <select class="form-select" id="dia_semana" name="dia_semana" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="L">Lunes</option>
+                                <option value="M">Martes</option>
+                                <option value="X">Miércoles</option>
+                                <option value="J">Jueves</option>
+                                <option value="V">Viernes</option>
+                                <option value="S">Sábado</option>
+                                <option value="D">Domingo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="hora_inicio" class="form-label">Hora de Inicio *</label>
+                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="duracion_minutos" class="form-label">Duración (minutos) *</label>
+                            <input type="number" class="form-control" id="duracion_minutos" name="duracion_minutos" 
+                                   min="15" max="180" value="60" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="capacidad_maxima" class="form-label">Capacidad Máxima *</label>
+                            <input type="number" class="form-control" id="capacidad_maxima" name="capacidad_maxima" 
+                                   min="1" max="50" value="20" required>
+                            <small class="text-muted">Número máximo de socios por clase</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Crear Clase
+                        </button>
+                        <a href="{% url 'gimnasio:listado_clases' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

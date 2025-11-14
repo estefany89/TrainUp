@@ -1,0 +1,38 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom:20px;">Listado de Clases</h2>
+
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px; margin: 0 auto;">
+    <!-- Cabecera -->
+    <div style="display: flex; font-weight: bold; background-color:#bdc3c7; color:#2c3e50; padding: 10px; border-radius: 5px;">
+        <div style="flex:2;">Nombre</div>
+        <div style="flex:1;">Día</div>
+        <div style="flex:1;">Hora</div>
+        <div style="flex:1;">Nivel</div>
+        <div style="flex:2;">Monitor</div>
+        <div style="flex:1;">Capacidad</div>
+        <div style="flex:1;">Plazas libres</div>
+    </div>
+
+    {% for clase in clases %}
+    <div style="display: flex; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#ececec;">
+        <div style="flex:2;">{{ clase.nombre }}</div>
+        <div style="flex:1;">{{ clase.get_dia_semana_display }}</div>
+        <div style="flex:1;">{{ clase.hora_inicio|time:"H:i" }}</div>
+        <div style="flex:1;">{{ clase.get_nivel_display }}</div>
+        <div style="flex:2;">
+            {% if clase.monitor %}
+                {{ clase.monitor.nombre_completo }}
+            {% else %}
+                Sin monitor
+            {% endif %}
+        </div>
+        <div style="flex:1;">{{ clase.capacidad_maxima }}</div>
+        <div style="flex:1;">{{ clase.plazas_disponibles }}</div>
+    </div>
+    {% empty %}
+    <p style="text-align:center;">No hay clases activas.</p>
+    {% endfor %}
+</div>
+{% endblock %}
