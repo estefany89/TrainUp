@@ -1,0 +1,49 @@
+{% extends 'gimnasio/base.html' %}
+{% block title %}Mis Reservas{% endblock %}
+
+{% block content %}
+<h2>Mis Reservas</h2>
+
+{% if reservas %}
+    <ul>
+    {% for reserva in reservas %}
+        <li>
+            <strong>{{ reserva.clase.nombre }}</strong> - {{ reserva.fecha|date:"d/m/Y" }}
+            {% if not reserva.cancelada %}
+                <form method="post" action="{% url 'gimnasio:cancelar_reserva' reserva.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Cancelar</button>
+                </form>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No tienes reservas activas.</p>
+{% endif %}
+
+<hr>
+
+<h2>Próximas Clases Disponibles</h2>
+
+{% if proximas_clases %}
+    {% for item in proximas_clases %}
+        <h3>{{ item.clase.nombre }} ({{ item.clase.nivel }}) - {{ item.clase.dia_semana }}</h3>
+        <ul>
+        {% for fecha in item.fechas %}
+            <li>
+                {{ fecha.fecha|date:"d/m/Y" }} - Plazas disponibles: {{ fecha.disponibles }}
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="clase_id" value="{{ item.clase.id }}">
+                    <input type="hidden" name="fecha" value="{{ fecha.fecha|date:'Y-m-d' }}">
+                    <button type="submit">Reservar</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+{% else %}
+    <p>No hay clases disponibles próximamente.</p>
+{% endif %}
+{% endblock %}

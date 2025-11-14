@@ -35,9 +35,11 @@ urlpatterns = [
     path('clases/<int:pk>/eliminar/', views.EliminarClaseView.as_view(), name='eliminar_clase'),
 
     # ===== RESERVAS =====
+    #path('reservas/', views.MisReservasView.as_view(), name='mis_reservas'),
     path('reservas/', views.MisReservasView.as_view(), name='mis_reservas'),
-    path('reservas/nueva/<int:clase_pk>/', views.NuevaReservaView.as_view(), name='nueva_reserva'),
     path('reservas/<int:pk>/cancelar/', views.CancelarReservaView.as_view(), name='cancelar_reserva'),
+
+
 
     # ===== PAGOS =====
     path('pagos/', views.MisPagosView.as_view(), name='mis_pagos'),

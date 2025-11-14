@@ -529,82 +529,66 @@ class EliminarClaseView(View):
 # RESERVAS
 # ============================================
 @method_decorator([login_required, socio_required], name='dispatch')
-class MisReservasView(ListView):
-    model = Reserva
+class MisReservasView(View):
     template_name = 'gimnasio/mis_reservas.html'
-    context_object_name = 'reservas'
 
-    def get_queryset(self):
-        return Reserva.objects.filter(
-            socio=self.request.user,
+    def get(self, request):
+        # Listar reservas actuales
+        reservas = Reserva.objects.filter(
+            socio=request.user,
             cancelada=False
         ).select_related('clase', 'clase__monitor').order_by('-fecha')
 
-
-@method_decorator([login_required, socio_required], name='dispatch')
-class NuevaReservaView(View):
-    def get(self, request, clase_pk):
-        clase = get_object_or_404(Clase, pk=clase_pk, activa=True)
-
-        # Calcular próximas fechas disponibles
-        proximas_fechas = []
+        # Preparar próximas clases disponibles
+        proximas_clases = []
         hoy = timezone.now().date()
-        for i in range(28):  # Próximas 4 semanas
-            fecha = hoy + timedelta(days=i)
-            dia_codigo = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][fecha.weekday()]
-            if dia_codigo == clase.dia_semana and fecha >= hoy:
-                # Verificar si hay plazas disponibles
-                reservas_esa_fecha = Reserva.objects.filter(
-                    clase=clase,
-                    fecha=fecha,
-                    cancelada=False
-                ).count()
+        clases_activas = Clase.objects.filter(activa=True).order_by('dia_semana', 'hora_inicio')
 
-                if reservas_esa_fecha < clase.capacidad_maxima:
-                    proximas_fechas.append({
-                        'fecha': fecha,
-                        'disponibles': clase.capacidad_maxima - reservas_esa_fecha
-                    })
+        dias = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+        for clase in clases_activas:
+            fechas_disponibles = []
+            for i in range(28):  # Próximas 4 semanas
+                fecha = hoy + timedelta(days=i)
+                if dias[fecha.weekday()] == clase.dia_semana:
+                    reservas_fecha = Reserva.objects.filter(
+                        clase=clase,
+                        fecha=fecha,
+                        cancelada=False
+                    ).count()
+                    if reservas_fecha < clase.capacidad_maxima:
+                        fechas_disponibles.append({
+                            'fecha': fecha,
+                            'disponibles': clase.capacidad_maxima - reservas_fecha
+                        })
+            if fechas_disponibles:
+                proximas_clases.append({'clase': clase, 'fechas': fechas_disponibles[:10]})
 
         context = {
-            'clase': clase,
-            'proximas_fechas': proximas_fechas[:10]
+            'reservas': reservas,
+            'proximas_clases': proximas_clases
         }
-        return render(request, 'gimnasio/nueva_reserva.html', context)
+        return render(request, self.template_name, context)
 
-    def post(self, request, clase_pk):
-        clase = get_object_or_404(Clase, pk=clase_pk, activa=True)
+    def post(self, request):
+        clase_id = request.POST.get('clase_id')
         fecha_str = request.POST.get('fecha')
+
+        clase = get_object_or_404(Clase, pk=clase_id, activa=True)
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
 
-        # Verificar si ya tiene reserva para esa clase y fecha
-        if Reserva.objects.filter(
-                socio=request.user,
-                clase=clase,
-                fecha=fecha,
-                cancelada=False
-        ).exists():
+        # Verificar reserva previa
+        if Reserva.objects.filter(socio=request.user, clase=clase, fecha=fecha, cancelada=False).exists():
             messages.error(request, 'Ya tienes una reserva para esta clase en esa fecha.')
-            return redirect('gimnasio:nueva_reserva', clase_pk=clase_pk)
+            return redirect('gimnasio:mis_reservas')
 
         # Verificar capacidad
-        reservas_existentes = Reserva.objects.filter(
-            clase=clase,
-            fecha=fecha,
-            cancelada=False
-        ).count()
-
+        reservas_existentes = Reserva.objects.filter(clase=clase, fecha=fecha, cancelada=False).count()
         if reservas_existentes >= clase.capacidad_maxima:
             messages.error(request, 'No hay plazas disponibles para esta fecha.')
-            return redirect('gimnasio:nueva_reserva', clase_pk=clase_pk)
+            return redirect('gimnasio:mis_reservas')
 
         # Crear reserva
-        Reserva.objects.create(
-            socio=request.user,
-            clase=clase,
-            fecha=fecha
-        )
-
+        Reserva.objects.create(socio=request.user, clase=clase, fecha=fecha)
         messages.success(request, f'Reserva confirmada para {clase.nombre} el {fecha.strftime("%d/%m/%Y")}.')
         return redirect('gimnasio:mis_reservas')
 
