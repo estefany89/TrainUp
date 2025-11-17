@@ -35,7 +35,6 @@ urlpatterns = [
     path('clases/<int:pk>/eliminar/', views.EliminarClaseView.as_view(), name='eliminar_clase'),
 
     # ===== RESERVAS =====
-    #path('reservas/', views.MisReservasView.as_view(), name='mis_reservas'),
     path('reservas/', views.MisReservasView.as_view(), name='mis_reservas'),
     path('reservas/<int:pk>/cancelar/', views.CancelarReservaView.as_view(), name='cancelar_reserva'),
 
@@ -52,9 +51,9 @@ urlpatterns = [
     path('usuarios/<int:pk>/desactivar/', views.DesactivarSocioView.as_view(), name='desactivar_usuario'),
 
     # ===== GESTIÓN PAGOS (ADMIN) =====
-    path('admin/pagos/', views.GestionPagosView.as_view(), name='gestion_pagos'),
-    path('admin/pagos/nuevo/', views.NuevoPagoView.as_view(), name='nuevo_pago'),
-    path('admin/pagos/<int:pk>/marcar-pagado/', views.MarcarPagadoView.as_view(), name='marcar_pagado'),
+    path('gestion-pagos/', views.GestionPagosView.as_view(), name='gestion_pagos'),
+    path('gestion-pagos/nuevo/', views.NuevoPagoView.as_view(), name='nuevo_pago'),
+    path('gestion-pagos/<int:pk>/marcar-pagado/', views.MarcarPagadoView.as_view(), name='marcar_pagado'),
 
     # ===== ADMIN - ASIGNAR CLASES A MONITORES =====
     path('admin/asignar-clases/', views.AsignarClasesMonitorView.as_view(), name='asignar_clases_monitor'),

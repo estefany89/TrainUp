@@ -1,0 +1,142 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Estadísticas - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-bar-chart"></i> Estadísticas Generales</h1>
+        <p class="text-muted">Dashboard con métricas clave del gimnasio</p>
+    </div>
+</div>
+
+<!-- Estadísticas Principales -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-people-fill" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">{{ total_socios }}</h2>
+                <p class="mb-0">Socios Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-person-badge" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">{{ total_monitores }}</h2>
+                <p class="mb-0">Monitores</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-activity" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">{{ total_clases }}</h2>
+                <p class="mb-0">Clases Activas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">{{ pagos_pendientes }}</h2>
+                <p class="mb-0">Pagos Pendientes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reservas -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-day"></i> Reservas Hoy</h5>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4 text-primary">{{ reservas_hoy }}</h1>
+                <p class="text-muted">Clases reservadas para hoy</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Reservas Esta Semana</h5>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4 text-success">{{ reservas_semana }}</h1>
+                <p class="text-muted">Clases reservadas próximos 7 días</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ingresos del Mes -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Ingresos del Mes Actual</h5>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-3 text-success">{{ ingresos_mes|floatformat:2 }}€</h1>
+                <p class="text-muted">Total de ingresos este mes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clases Más Populares -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-star-fill"></i> Clases Más Populares</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Clase</th>
+                                <th>Monitor</th>
+                                <th>Total Reservas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases_populares %}
+                            <tr>
+                                <td>
+                                    {% if forloop.counter == 1 %}
+                                        <span class="badge bg-warning">🥇</span>
+                                    {% elif forloop.counter == 2 %}
+                                        <span class="badge bg-secondary">🥈</span>
+                                    {% elif forloop.counter == 3 %}
+                                        <span class="badge bg-danger">🥉</span>
+                                    {% else %}
+                                        {{ forloop.counter }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ clase.nombre }}</strong></td>
+                                <td>{{ clase.monitor.nombre_completo|default:"Sin monitor" }}</td>
+                                <td><span class="badge bg-primary">{{ clase.num_reservas }} reservas</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No hay datos disponibles</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

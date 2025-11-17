@@ -1,0 +1,78 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Nuevo Pago - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Registrar Nuevo Pago</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="socio" class="form-label">Socio *</label>
+                        <select class="form-select" id="socio" name="socio" required>
+                            <option value="">-- Seleccionar Socio --</option>
+                            {% for socio in socios %}
+                                <option value="{{ socio.id }}">
+                                    {{ socio.get_full_name|default:socio.username }} ({{ socio.email }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tipo_pago" class="form-label">Tipo de Pago *</label>
+                            <select class="form-select" id="tipo_pago" name="tipo_pago" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="mensual">Cuota Mensual</option>
+                                <option value="trimestral">Cuota Trimestral</option>
+                                <option value="anual">Cuota Anual</option>
+                                <option value="matricula">Matrícula</option>
+                                <option value="clase_extra">Clase Extra</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="importe" class="form-label">Importe (€) *</label>
+                            <input type="number" class="form-control" id="importe" name="importe" 
+                                   step="0.01" min="0" placeholder="50.00" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="concepto" class="form-label">Concepto *</label>
+                        <input type="text" class="form-control" id="concepto" name="concepto" 
+                               placeholder="Ej: Cuota Mensual Enero 2025" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento *</label>
+                        <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3"
+                                  placeholder="Notas adicionales sobre el pago..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Registrar Pago
+                        </button>
+                        <a href="{% url 'gimnasio:gestion_pagos' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

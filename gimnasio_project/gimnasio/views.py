@@ -777,15 +777,32 @@ class GestionPagosView(ListView):
 
         if estado:
             queryset = queryset.filter(estado=estado)
+
         if socio_id:
             queryset = queryset.filter(socio_id=socio_id)
-        if mes:
-            year, month = mes.split('-')
-            queryset = queryset.filter(
-                fecha_emision__year=year,
-                fecha_emision__month=month
-            )
 
+        if mes:
+            # Diccionario para meses en español
+            meses = {
+                'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4, 'Mayo': 5,
+                'Junio': 6, 'Julio': 7, 'Agosto': 8, 'Septiembre': 9,
+                'Octubre': 10, 'Noviembre': 11, 'Diciembre': 12
+            }
+
+            try:
+                # Intentar formato YYYY-MM
+                year, month = mes.split('-')
+                queryset = queryset.filter(
+                    fecha_emision__year=int(year),
+                    fecha_emision__month=int(month)
+                )
+            except ValueError:
+                # Si no es YYYY-MM, intentar nombre de mes
+                month_number = meses.get(mes.capitalize())
+                if month_number:
+                    queryset = queryset.filter(fecha_emision__month=month_number)
+
+        # Siempre devolver un queryset, nunca None
         return queryset.order_by('-fecha_emision')
 
     def get_context_data(self, **kwargs):
@@ -804,6 +821,7 @@ class GestionPagosView(ListView):
         ).aggregate(total=models.Sum('importe'))['total'] or 0
 
         return context
+
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
@@ -842,9 +860,13 @@ class MarcarPagadoView(View):
         pago = get_object_or_404(Pago, pk=pk)
         metodo_pago = request.POST.get('metodo_pago')
 
+        if not metodo_pago:
+            messages.error(request, 'Debes seleccionar un método de pago.')
+            return redirect('gimnasio:gestion_pagos')
+
         pago.marcar_pagado(metodo_pago)
 
-        messages.success(request, 'Pago marcado como pagado correctamente.')
+        messages.success(request, f'Pago de {pago.socio.get_full_name()} marcado como pagado correctamente.')
         return redirect('gimnasio:gestion_pagos')
 
 

@@ -1,0 +1,178 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block title %}Gestión de Pagos - TrainUp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="bi bi-credit-card"></i> Gestión de Pagos</h1>
+        <p class="text-muted">Historial de pagos de todos los socios</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'gimnasio:nuevo_pago' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Pago
+        </a>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <i class="bi bi-hourglass-split" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ total_pendiente|floatformat:2 }}€</h3>
+                <p class="mb-0">Total Pendiente</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-cash-coin" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ total_mes|floatformat:2 }}€</h3>
+                <p class="mb-0">Ingresos Este Mes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" name="estado" id="estado">
+                <option value="">Todos</option>
+                <option value="pendiente" {% if request.GET.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                <option value="pagado" {% if request.GET.estado == "pagado" %}selected{% endif %}>Pagado</option>
+                <option value="vencido" {% if request.GET.estado == "vencido" %}selected{% endif %}>Vencido</option>
+                </select>
+
+            </div>
+            <div class="col-md-4">
+            <label for="socio" class="form-label">Socio</label>
+            <select class="form-select" name="socio" id="socio">
+                <option value="">Todos los socios</option>
+                {% for socio in socios %}
+                    <option value="{{ socio.id }}" {% if request.GET.socio == socio.id|stringformat:"s" %}selected{% endif %}>
+                        {{ socio.get_full_name|default:socio.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+            <div class="col-md-3">
+            <label for="mes" class="form-label">Mes</label>
+            <input type="month" class="form-control" name="mes" id="mes" value="{{ request.GET.mes }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Pagos -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Socio</th>
+                        <th>Concepto</th>
+                        <th>Importe</th>
+                        <th>Tipo</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td>
+                            <i class="bi bi-person-circle"></i>
+                            {{ pago.socio.get_full_name|default:pago.socio.username }}
+                        </td>
+                        <td>{{ pago.concepto }}</td>
+                        <td><strong>{{ pago.importe }}€</strong></td>
+                        <td><span class="badge bg-secondary">{{ pago.get_tipo_pago_display }}</span></td>
+                        <td>{{ pago.fecha_vencimiento|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if pago.estado == 'pagado' %}
+                                <span class="badge bg-success">Pagado</span>
+                            {% elif pago.estado == 'pendiente' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            {% elif pago.estado == 'vencido' %}
+                                <span class="badge bg-danger">Vencido</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ pago.get_estado_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pago.estado == 'pendiente' %}
+                                <button type="button" class="btn btn-sm btn-success"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#marcarPagadoModal{{ pago.id }}">
+                                    <i class="bi bi-check-circle"></i> Marcar Pagado
+                                </button>
+                            {% else %}
+                                <small class="text-muted">Pagado el {{ pago.fecha_pago|date:"d/m/Y" }}</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Modal Marcar como Pagado -->
+                    <div class="modal fade" id="marcarPagadoModal{{ pago.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Marcar Pago como Pagado</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="{% url 'gimnasio:marcar_pagado' pago.pk %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <p><strong>Socio:</strong> {{ pago.socio.get_full_name }}</p>
+                                        <p><strong>Concepto:</strong> {{ pago.concepto }}</p>
+                                        <p><strong>Importe:</strong> {{ pago.importe }}€</p>
+
+                                        <div class="mb-3">
+                                            <label for="metodo_pago{{ pago.id }}" class="form-label">Método de Pago *</label>
+                                            <select class="form-select" name="metodo_pago" id="metodo_pago{{ pago.id }}" required>
+                                                <option value="">-- Seleccionar --</option>
+                                                <option value="efectivo">Efectivo</option>
+                                                <option value="tarjeta">Tarjeta</option>
+                                                <option value="transferencia">Transferencia</option>
+                                                <option value="domiciliacion">Domiciliación</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-success">Confirmar Pago</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-2">No hay pagos registrados</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
