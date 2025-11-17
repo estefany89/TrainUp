@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - {{ perfil.user.get_full_name }}</title>
+    <style>
+        /* Reset y estilo base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Contenedor principal */
+        .perfil-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            padding: 40px 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Imagen del usuario */
+        .perfil-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #007bff;
+            margin-bottom: 20px;
+        }
+
+        /* Nombre */
+        .perfil-card h1 {
+            font-size: 28px;
+            color: #333333;
+            margin-bottom: 10px;
+        }
+
+        /* Datos personales */
+        .perfil-card p {
+            font-size: 18px;
+            color: #555555;
+            margin: 8px 0;
+        }
+
+        /* Rol destacado */
+        .perfil-card .rol {
+            display: inline-block;
+            padding: 8px 20px;
+            margin-top: 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #fff;
+            text-transform: capitalize;
+            background-color: #007bff;
+            font-size: 16px;
+        }
+
+        /* Efecto hover */
+        .perfil-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="perfil-card">
+        {% if perfil.foto %}
+            <img src="{{ perfil.foto.url }}" alt="Foto de {{ perfil.user.get_full_name }}">
+        {% else %}
+            <img src="https://via.placeholder.com/120" alt="Sin foto">
+        {% endif %}
+        <h1>{{ perfil.user.get_full_name }}</h1>
+        <p><strong>Usuario:</strong> {{ perfil.user.username }}</p>
+        <p><strong>Email:</strong> {{ perfil.user.email }}</p>
+        <p><strong>Teléfono:</strong> {{ perfil.telefono }}</p>
+        <p><strong>DNI:</strong> {{ perfil.dni }}</p>
+        <span class="rol">{{ perfil.rol }}</span>
+    </div>
+</body>
+</html>
