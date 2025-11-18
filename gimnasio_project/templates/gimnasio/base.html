@@ -172,11 +172,15 @@
                                     <li><a class="dropdown-item" href="{% url 'gimnasio:nuevo_pago' %}">
                                         <i class="bi bi-plus-circle"></i> Activación
                                     </a></li>
-                                    <li><a class="dropdown-item" href="{% url 'gimnasio:estadisticas' %}">
-                                        <i class="bi bi-bar-chart"></i> Estadísticas
-                                    </a></li>
                                 </ul>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'gimnasio:estadisticas' %}">
+                                    <i class="bi bi-bar-chart"></i> Estadísticas
+                                </a>
+                            </li>
+
+                            
 
                         {% elif user.perfil.rol == 'monitor' %}
                             <!-- ========== MENÚ MONITOR ========== -->
