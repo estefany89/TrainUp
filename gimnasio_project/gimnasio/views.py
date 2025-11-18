@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
 from datetime import datetime, timedelta
-
+from django.db import IntegrityError, transaction
 from .models import PerfilUsuario, Monitor, Clase, Reserva, Pago
 from .decorators import admin_required, socio_required
 
@@ -565,7 +565,8 @@ class MisReservasView(View):
 
         context = {
             'reservas': reservas,
-            'proximas_clases': proximas_clases
+            'proximas_clases': proximas_clases,
+            'today': timezone.now().date(),
         }
         return render(request, self.template_name, context)
 
@@ -576,20 +577,47 @@ class MisReservasView(View):
         clase = get_object_or_404(Clase, pk=clase_id, activa=True)
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
 
-        # Verificar reserva previa
-        if Reserva.objects.filter(socio=request.user, clase=clase, fecha=fecha, cancelada=False).exists():
+        # Verificar si ya existe una reserva activa para este socio, clase y fecha
+        reserva_existente = Reserva.objects.filter(
+            socio=request.user,
+            clase=clase,
+            fecha=fecha,
+            cancelada=False
+        ).first()
+
+        if reserva_existente:
             messages.error(request, 'Ya tienes una reserva para esta clase en esa fecha.')
             return redirect('gimnasio:mis_reservas')
 
-        # Verificar capacidad
-        reservas_existentes = Reserva.objects.filter(clase=clase, fecha=fecha, cancelada=False).count()
-        if reservas_existentes >= clase.capacidad_maxima:
+        # Verificar si hay plazas disponibles (solo contando reservas activas)
+        reservas_activas = Reserva.objects.filter(
+            clase=clase,
+            fecha=fecha,
+            cancelada=False
+        ).count()
+
+        if reservas_activas >= clase.capacidad_maxima:
             messages.error(request, 'No hay plazas disponibles para esta fecha.')
             return redirect('gimnasio:mis_reservas')
 
-        # Crear reserva
-        Reserva.objects.create(socio=request.user, clase=clase, fecha=fecha)
-        messages.success(request, f'Reserva confirmada para {clase.nombre} el {fecha.strftime("%d/%m/%Y")}.')
+        # Verificar si existe una reserva cancelada para reutilizarla
+        reserva_cancelada = Reserva.objects.filter(
+            socio=request.user,
+            clase=clase,
+            fecha=fecha,
+            cancelada=True
+        ).first()
+
+        if reserva_cancelada:
+            # Reactivar la reserva cancelada
+            reserva_cancelada.cancelada = False
+            reserva_cancelada.save()
+            messages.success(request, f'Reserva reactivada para {clase.nombre} el {fecha.strftime("%d/%m/%Y")}.')
+        else:
+            # Crear nueva reserva
+            Reserva.objects.create(socio=request.user, clase=clase, fecha=fecha)
+            messages.success(request, f'Reserva confirmada para {clase.nombre} el {fecha.strftime("%d/%m/%Y")}.')
+
         return redirect('gimnasio:mis_reservas')
 
 

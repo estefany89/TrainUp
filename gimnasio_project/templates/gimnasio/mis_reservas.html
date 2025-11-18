@@ -2,48 +2,67 @@
 {% block title %}Mis Reservas{% endblock %}
 
 {% block content %}
-<h2>Mis Reservas</h2>
+<div class="container my-4">
 
-{% if reservas %}
-    <ul>
-    {% for reserva in reservas %}
-        <li>
-            <strong>{{ reserva.clase.nombre }}</strong> - {{ reserva.fecha|date:"d/m/Y" }}
-            {% if not reserva.cancelada %}
-                <form method="post" action="{% url 'gimnasio:cancelar_reserva' reserva.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">Cancelar</button>
-                </form>
+    <h2>Mis Reservas Activas</h2>
+    {% if reservas %}
+    <div class="list-group mb-4">
+        {% for reserva in reservas %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ reserva.clase.nombre }} ({{ reserva.clase.nivel }})</strong>
+                - {{ reserva.fecha|date:"d/m/Y" }}
+                {% if reserva.fecha < today %}
+                    <span class="text-muted">(Clase pasada)</span>
+                {% endif %}
+            </div>
+            {% if not reserva.cancelada and reserva.fecha >= today %}
+            <form method="post" action="{% url 'gimnasio:cancelar_reserva' reserva.id %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-danger">Cancelar</button>
+            </form>
             {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No tienes reservas activas.</p>
-{% endif %}
-
-<hr>
-
-<h2>Próximas Clases Disponibles</h2>
-
-{% if proximas_clases %}
-    {% for item in proximas_clases %}
-        <h3>{{ item.clase.nombre }} ({{ item.clase.nivel }}) - {{ item.clase.dia_semana }}</h3>
-        <ul>
-        {% for fecha in item.fechas %}
-            <li>
-                {{ fecha.fecha|date:"d/m/Y" }} - Plazas disponibles: {{ fecha.disponibles }}
-                <form method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <input type="hidden" name="clase_id" value="{{ item.clase.id }}">
-                    <input type="hidden" name="fecha" value="{{ fecha.fecha|date:'Y-m-d' }}">
-                    <button type="submit">Reservar</button>
-                </form>
-            </li>
+        </div>
         {% endfor %}
-        </ul>
-    {% endfor %}
-{% else %}
+    </div>
+    {% else %}
+    <p>No tienes reservas activas.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Próximas Clases Disponibles</h2>
+    {% if proximas_clases %}
+    <div class="accordion" id="clasesAccordion">
+        {% for item in proximas_clases %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                    {{ item.clase.nombre }} ({{ item.clase.nivel }}) - {{ item.clase.dia_semana }}
+                </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#clasesAccordion">
+                <div class="accordion-body">
+                    <ul class="list-group">
+                        {% for fecha in item.fechas %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ fecha.fecha|date:"d/m/Y" }} - Plazas disponibles: {{ fecha.disponibles }}
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="clase_id" value="{{ item.clase.id }}">
+                                <input type="hidden" name="fecha" value="{{ fecha.fecha|date:'Y-m-d' }}">
+                                <button class="btn btn-sm btn-primary">Reservar</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
     <p>No hay clases disponibles próximamente.</p>
-{% endif %}
+    {% endif %}
+</div>
 {% endblock %}
