@@ -56,8 +56,8 @@ urlpatterns = [
     path('gestion-pagos/<int:pk>/marcar-pagado/', views.MarcarPagadoView.as_view(), name='marcar_pagado'),
 
     # ===== ADMIN - ASIGNAR CLASES A MONITORES =====
-    path('admin/asignar-clases/', views.AsignarClasesMonitorView.as_view(), name='asignar_clases_monitor'),
-    path('admin/clases-reservadas/', views.ClasesReservadasAdminView.as_view(), name='clases_reservadas'),
+    path('gestion/asignar-clases/', views.AsignarClasesMonitorView.as_view(), name='asignar_clases_monitor'),
+    path('gestion/clases-reservadas/', views.ClasesReservadasAdminView.as_view(), name='clases_reservadas'),
 
     # ===== MONITOR - SUS CLASES =====
     path('monitor/mis-clases/', views.MisClasesMonitorView.as_view(), name='mis_clases_monitor'),
