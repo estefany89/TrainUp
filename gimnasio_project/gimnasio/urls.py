@@ -19,7 +19,6 @@ urlpatterns = [
     # ===== MONITORES =====
     path('monitores/', views.ListadoMonitoresView.as_view(), name='listado_monitores'),
     path('monitores/gestion/', views.GestionMonitoresView.as_view(), name='gestion_monitores'),
-    path('monitores/<int:pk>/', views.DetalleMonitorView.as_view(), name='detalle_monitor'),
     path('monitores/<int:pk>/editar/', views.EditarMonitorView.as_view(), name='editar_monitor'),
     path('monitores/<int:pk>/alternar/', views.AlternarEstadoMonitorView.as_view(), name='alternar_monitor'),
     path('monitores/borrar/<int:pk>/', views.BorrarMonitorView.as_view(), name='borrar_monitor'),
@@ -27,10 +26,10 @@ urlpatterns = [
 
 
     # ===== CLASES =====
-    path('clases/', views.ListadoClasesView.as_view(), name='listado_clases'),
-    path('clases/horario/', views.HorarioClasesView.as_view(), name='horario_clases'),
+
     path('clases/nueva/', views.NuevaClaseView.as_view(), name='nueva_clase'),
-    path('clases/<int:pk>/', views.DetalleClaseView.as_view(), name='detalle_clase'),
+    #path('clases/<int:pk>/', views.DetalleClaseView.as_view(), name='detalle_clase'),
+    path('clases/', views.ListadoClasesView.as_view(), name='listado_clases'),
     path('clases/<int:pk>/editar/', views.EditarClaseView.as_view(), name='editar_clase'),
     path('clases/<int:pk>/eliminar/', views.EliminarClaseView.as_view(), name='eliminar_clase'),
 

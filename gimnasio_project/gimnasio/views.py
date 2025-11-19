@@ -221,21 +221,6 @@ class ListadoMonitoresView(ListView):
 
         return queryset.order_by('apellidos', 'nombre')
 
-
-class DetalleMonitorView(DetailView):
-    model = Monitor
-    template_name = 'gimnasio/detalle_monitor.html'
-    context_object_name = 'monitor'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['clases'] = Clase.objects.filter(
-            monitor=self.object,
-            activa=True
-        ).order_by('dia_semana', 'hora_inicio')
-        return context
-
-
 @method_decorator([login_required, admin_required], name='dispatch')
 class GestionMonitoresView(View):
     def get(self, request):
@@ -336,7 +321,7 @@ class EditarMonitorView(View):
         monitor.save()
 
         messages.success(request, 'Monitor actualizado correctamente.')
-        return redirect('gimnasio:detalle_monitor', pk=pk)
+        return redirect('gimnasio:gestion_monitores')
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
@@ -390,32 +375,6 @@ class ListadoClasesView(ListView):
         context = super().get_context_data(**kwargs)
         context['monitores'] = Monitor.objects.filter(activo=True)
         return context
-
-
-class HorarioClasesView(View):
-    """Vista de horario semanal de clases"""
-
-    def get(self, request):
-        clases = Clase.objects.filter(activa=True).order_by('dia_semana', 'hora_inicio')
-
-        # Organizar clases por día
-        dias = {
-            'L': 'Lunes',
-            'M': 'Martes',
-            'X': 'Miércoles',
-            'J': 'Jueves',
-            'V': 'Viernes',
-            'S': 'Sábado',
-            'D': 'Domingo'
-        }
-
-        horario = {}
-        for codigo, nombre in dias.items():
-            horario[nombre] = clases.filter(dia_semana=codigo)
-
-        context = {'horario': horario}
-        return render(request, 'gimnasio/horario_clases.html', context)
-
 
 class DetalleClaseView(DetailView):
     model = Clase
@@ -489,19 +448,33 @@ class EditarClaseView(View):
     def get(self, request, pk):
         clase = get_object_or_404(Clase, pk=pk)
         monitores = Monitor.objects.filter(activo=True)
+
+        # corregi los dias de la semana
+        dia_semana_choices = Clase._meta.get_field('dia_semana').choices
+        nivel_choices = Clase._meta.get_field('nivel').choices
+
         return render(request, 'gimnasio/editar_clase.html', {
             'clase': clase,
-            'monitores': monitores
+            'monitores': monitores,
+            'dia_semana_choices': dia_semana_choices,
+            'nivel_choices': nivel_choices,
         })
 
     def post(self, request, pk):
         clase = get_object_or_404(Clase, pk=pk)
 
+        # Actualizar campos desde el formulario
         clase.nombre = request.POST.get('nombre')
         clase.descripcion = request.POST.get('descripcion')
         monitor_id = request.POST.get('monitor')
         clase.monitor = get_object_or_404(Monitor, pk=monitor_id) if monitor_id else None
-        clase.dia_semana = request.POST.get('dia_semana')
+
+        dia_semana = request.POST.get('dia_semana')
+        if not dia_semana:
+            messages.error(request, 'Debes seleccionar un día de la semana.')
+            return redirect('gimnasio:editar_clase', pk=pk)
+        clase.dia_semana = dia_semana
+
         clase.hora_inicio = request.POST.get('hora_inicio')
         clase.duracion_minutos = request.POST.get('duracion_minutos')
         clase.capacidad_maxima = request.POST.get('capacidad_maxima')
@@ -509,9 +482,8 @@ class EditarClaseView(View):
         clase.sala = request.POST.get('sala', '')
 
         clase.save()
-
         messages.success(request, 'Clase actualizada correctamente.')
-        return redirect('gimnasio:detalle_clase', pk=pk)
+        return redirect('gimnasio:listado_clases')
 
 
 @method_decorator([login_required, admin_required], name='dispatch')

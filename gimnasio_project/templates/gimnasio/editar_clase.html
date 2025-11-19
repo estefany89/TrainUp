@@ -1,0 +1,74 @@
+{% extends 'gimnasio/base.html' %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="text-center mb-4">Editar Clase: {{ clase.nombre }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" value="{{ clase.nombre }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" name="descripcion" class="form-control">{{ clase.descripcion }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="monitor" class="form-label">Monitor</label>
+            <select id="monitor" name="monitor" class="form-control">
+                <option value="">Sin monitor</option>
+                {% for monitor in monitores %}
+                    <option value="{{ monitor.pk }}" {% if clase.monitor and monitor.pk == clase.monitor.pk %}selected{% endif %}>
+                        {{ monitor.nombre_completo }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="dia_semana" class="form-label">Día de la semana</label>
+            <select id="dia_semana" name="dia_semana" class="form-control" required>
+                {% for value, display in dia_semana_choices %}
+                    <option value="{{ value }}" {% if clase.dia_semana == value %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="hora_inicio" class="form-label">Hora de inicio</label>
+            <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" value="{{ clase.hora_inicio|time:'H:i' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="duracion_minutos" class="form-label">Duración (minutos)</label>
+            <input type="number" id="duracion_minutos" name="duracion_minutos" class="form-control" value="{{ clase.duracion_minutos }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="capacidad_maxima" class="form-label">Capacidad máxima</label>
+            <input type="number" id="capacidad_maxima" name="capacidad_maxima" class="form-control" value="{{ clase.capacidad_maxima }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="nivel" class="form-label">Nivel</label>
+            <select id="nivel" name="nivel" class="form-control" required>
+                {% for value, display in nivel_choices %}
+                    <option value="{{ value }}" {% if clase.nivel == value %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="sala" class="form-label">Sala</label>
+            <input type="text" id="sala" name="sala" class="form-control" value="{{ clase.sala }}">
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+        <a href="{% url 'gimnasio:listado_clases' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
