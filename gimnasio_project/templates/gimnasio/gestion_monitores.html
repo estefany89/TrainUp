@@ -3,26 +3,39 @@
 {% block title %}Gestión de Monitores - TrainUp{% endblock %}
 
 {% block content %}
+<style>
+.btn-xs {
+    padding: 0.25rem 0.4rem; /* menos padding */
+    font-size: 0.75rem;       /* tamaño de texto más pequeño */
+}
+.card-header, .card-body, .card-footer {
+    padding: 0.25rem 0.5rem; /* padding reducido en toda la tarjeta */
+}
+.card-img-top {
+    height: 120px;           /* imagen más baja */
+    object-fit: cover;
+}
+</style>
+
 <div class="row mb-4">
     <div class="col-md-8">
         <h1><i class="bi bi-person-badge"></i> Gestión de Monitores</h1>
         <p class="text-muted">Administra los monitores del gimnasio</p>
     </div>
     <div class="col-md-4 text-end">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoMonitorModal">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#nuevoMonitorModal">
             <i class="bi bi-person-plus-fill"></i> Nuevo Monitor
         </button>
     </div>
 </div>
 
-<!-- Lista de Monitores -->
 <div class="row">
     {% for monitor in monitores %}
-    <div class="col-md-6 col-lg-4 mb-4">
+    <div class="col-md-3 col-lg-2 mb-3">
         <div class="card h-100 {% if not monitor.activo %}opacity-50{% endif %}">
             <div class="card-header {% if monitor.activo %}bg-success{% else %}bg-secondary{% endif %} text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">{{ monitor.nombre_completo }}</h6>
+                    <h6 class="mb-0 small">{{ monitor.nombre_completo }}</h6>
                     {% if monitor.activo %}
                         <span class="badge bg-light text-success">Activo</span>
                     {% else %}
@@ -30,66 +43,44 @@
                     {% endif %}
                 </div>
             </div>
-            
+
             {% if monitor.foto %}
-            <img src="{{ monitor.foto.url }}" class="card-img-top" alt="{{ monitor.nombre_completo }}" style="height: 200px; object-fit: cover;">
+            <img src="{{ monitor.foto.url }}" class="card-img-top" alt="{{ monitor.nombre_completo }}">
             {% endif %}
-            
+
             <div class="card-body">
-                <p class="mb-2">
-                    <i class="bi bi-award text-primary"></i>
-                    <strong>Especialidad:</strong> {{ monitor.get_especialidad_display }}
-                </p>
-                <p class="mb-2">
-                    <i class="bi bi-envelope text-info"></i>
-                    <strong>Email:</strong> {{ monitor.email }}
-                </p>
-                <p class="mb-2">
-                    <i class="bi bi-telephone text-success"></i>
-                    <strong>Teléfono:</strong> {{ monitor.telefono }}
-                </p>
-                <p class="mb-2">
-                    <i class="bi bi-card-text text-secondary"></i>
-                    <strong>DNI:</strong> {{ monitor.dni }}
-                </p>
-                
-                {% if monitor.biografia %}
-                <p class="text-muted small">{{ monitor.biografia|truncatewords:20 }}</p>
-                {% endif %}
-                
-                <p class="mb-0 text-muted small">
-                    <i class="bi bi-calendar"></i> Desde: {{ monitor.fecha_contratacion|date:"d/m/Y" }}
-                </p>
+                <p class="mb-1 small"><strong>Especialidad:</strong> {{ monitor.get_especialidad_display }}</p>
+                <p class="mb-1 small"><strong>Teléfono:</strong> {{ monitor.telefono }}</p>
+                <p class="mb-1 small"><strong>DNI:</strong> {{ monitor.dni }}</p>
+                <p class="mb-0 text-muted small"><strong>Desde:</strong> {{ monitor.fecha_contratacion|date:"d/m/Y" }}</p>
             </div>
-            
-            <div class="card-footer bg-transparent">
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary flex-fill" 
-                            data-bs-toggle="modal" 
+
+            <div class="card-footer bg-transparent p-1">
+                <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-xs flex-fill"
+                            data-bs-toggle="modal"
                             data-bs-target="#editarMonitorModal{{ monitor.id }}">
                         <i class="bi bi-pencil"></i> Editar
                     </button>
-                <form method="post" action="{% url 'gimnasio:alternar_monitor' monitor.pk %}" class="flex-fill">
-                {% csrf_token %}
-                    <button type="submit" class="btn btn-sm w-100 {% if monitor.activo %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
-                    onclick="return confirm('{% if monitor.activo %}¿Desactivar{% else %}¿Activar{% endif %} este monitor?')">
-                    <i class="bi {% if monitor.activo %}bi-x-circle{% else %}bi-check-circle{% endif %}"></i>
-                {% if monitor.activo %}Desactivar{% else %}Activar{% endif %}
-            </button>
-            </form>
 
+                    <form method="post" action="{% url 'gimnasio:alternar_monitor' monitor.pk %}" class="flex-fill">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-xs w-100 {% if monitor.activo %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                onclick="return confirm('{% if monitor.activo %}¿Desactivar{% else %}¿Activar{% endif %} este monitor?')">
+                            <i class="bi {% if monitor.activo %}bi-x-circle{% else %}bi-check-circle{% endif %}"></i>
+                            {% if monitor.activo %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
 
-                    <!-- Botón Eliminar (solo si está inactivo) -->
                     {% if not monitor.activo %}
                     <form method="post" action="{% url 'gimnasio:borrar_monitor' monitor.pk %}" class="flex-fill">
-                         {% csrf_token %}
-                         <button type="submit" class="btn btn-sm btn-outline-dark w-100"
-                                 onclick="return confirm('⚠️ ¿Eliminar permanentemente este monitor? Esta acción no se puede deshacer.')">
-                             <i class="bi bi-trash"></i> Eliminar
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-dark btn-xs w-100"
+                                onclick="return confirm('¿Eliminar permanentemente este monitor?')">
+                            <i class="bi bi-trash"></i> Eliminar
                         </button>
                     </form>
                     {% endif %}
-
                 </div>
             </div>
         </div>
@@ -105,6 +96,7 @@
                     <form method="post" action="{% url 'gimnasio:editar_monitor' monitor.pk %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="modal-body">
+                            <!-- Campos Editar -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nombre *</label>
@@ -115,7 +107,6 @@
                                     <input type="text" class="form-control" name="apellidos" value="{{ monitor.apellidos }}" required>
                                 </div>
                             </div>
-                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Email *</label>
@@ -126,23 +117,18 @@
                                     <input type="tel" class="form-control" name="telefono" value="{{ monitor.telefono }}" required>
                                 </div>
                             </div>
-                            
                             <div class="mb-3">
                                 <label class="form-label">Especialidad *</label>
                                 <select class="form-select" name="especialidad" required>
                                     {% for value, label in monitor.ESPECIALIDADES %}
-                                        <option value="{{ value }}" {% if monitor.especialidad == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
+                                        <option value="{{ value }}" {% if monitor.especialidad == value %}selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            
                             <div class="mb-3">
                                 <label class="form-label">Biografía</label>
                                 <textarea class="form-control" name="biografia" rows="3">{{ monitor.biografia }}</textarea>
                             </div>
-                            
                             <div class="mb-3">
                                 <label class="form-label">Foto</label>
                                 <input type="file" class="form-control" name="foto" accept="image/*">
@@ -152,8 +138,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Guardar Cambios</button>
                         </div>
                     </form>
                 </div>
@@ -163,8 +149,7 @@
     {% empty %}
     <div class="col-12">
         <div class="alert alert-info text-center">
-            <i class="bi bi-info-circle"></i>
-            No hay monitores registrados. Haz clic en "Nuevo Monitor" para crear uno.
+            <i class="bi bi-info-circle"></i> No hay monitores registrados. Haz clic en "Nuevo Monitor" para crear uno.
         </div>
     </div>
     {% endfor %}
@@ -175,14 +160,13 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-plus-fill"></i> Nuevo Monitor
-                </h5>
+                <h5 class="modal-title"><i class="bi bi-person-plus-fill"></i> Nuevo Monitor</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <!-- Campos Nuevo Monitor -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nombre *</label>
@@ -193,7 +177,6 @@
                             <input type="text" class="form-control" name="apellidos" required>
                         </div>
                     </div>
-                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">DNI *</label>
@@ -204,13 +187,11 @@
                             <input type="tel" class="form-control" name="telefono" required>
                         </div>
                     </div>
-                    
                     <div class="mb-3">
                         <label class="form-label">Email *</label>
                         <input type="email" class="form-control" name="email" required>
                         <small class="text-muted">Se le enviará un correo con sus credenciales de acceso</small>
                     </div>
-                    
                     <div class="mb-3">
                         <label class="form-label">Especialidad *</label>
                         <select class="form-select" name="especialidad" required>
@@ -227,23 +208,18 @@
                             <option value="otra">Otra</option>
                         </select>
                     </div>
-                    
                     <div class="mb-3">
                         <label class="form-label">Biografía</label>
-                        <textarea class="form-control" name="biografia" rows="3" 
-                                  placeholder="Breve descripción del monitor..."></textarea>
+                        <textarea class="form-control" name="biografia" rows="3" placeholder="Breve descripción del monitor..."></textarea>
                     </div>
-                    
                     <div class="mb-3">
                         <label class="form-label">Foto</label>
                         <input type="file" class="form-control" name="foto" accept="image/*">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Crear Monitor
-                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-circle"></i> Crear Monitor</button>
                 </div>
             </form>
         </div>
