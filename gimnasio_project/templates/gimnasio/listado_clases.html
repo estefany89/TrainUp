@@ -16,7 +16,9 @@
                     <th>Monitor</th>
                     <th>Capacidad</th>
                     <th>Plazas libres</th>
+                    {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
                     <th>Acciones</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -35,18 +37,20 @@
                     </td>
                     <td>{{ clase.capacidad_maxima }}</td>
                     <td>{{ clase.plazas_disponibles }}</td>
+                    {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
                     <td>
                         <div class="d-flex gap-1">
-                            <!-- Botón Editar (si ya tienes modal o vista) -->
+                            <!-- Botón Editar (solo admin) -->
                             <a href="{% url 'gimnasio:editar_clase' clase.pk %}" class="btn btn-sm btn-primary">Editar</a>
 
-                            <!-- Botón Borrar -->
+                            <!-- Botón Borrar (solo admin) -->
                             <form method="post" action="{% url 'gimnasio:eliminar_clase' clase.pk %}" onsubmit="return confirm('¿Eliminar esta clase?');">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
                             </form>
                         </div>
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

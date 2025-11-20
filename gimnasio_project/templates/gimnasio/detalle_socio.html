@@ -1,7 +1,5 @@
 {% extends 'gimnasio/base.html' %}
-
 {% block title %}Detalle Socio - {{ perfil.user.get_full_name }}{% endblock %}
-
 {% block content %}
 <div class="row mb-3">
     <div class="col-md-8">
@@ -70,16 +68,19 @@
             </div>
         </div>
     </div>
-
    <!-- BOTONES -->
-        <div class="mt-4 text-end">
-            <form method="post" action="{% url 'gimnasio:desactivar_usuario' perfil.pk %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger me-2">
-                    {% if perfil.activo %}Desactivar{% else %}Activar{% endif %}
-                </button>
-            </form>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <div class="row mt-4 align-items-center">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="activo" id="activoCheck" value="1" {% if perfil.activo %}checked{% endif %}>
+                    <label class="form-check-label" for="activoCheck">
+                        Socio activo
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
         </div>
 </form>
 {% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'gimnasio/base.html' %}
+{% block title %}Reporte de Asistencia por Clases{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-graph-up"></i> Reporte de Asistencia por Clase</h1>
+        <p class="text-muted">Asistencia y participación en clases</p>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Asistencia por Clase
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Clase</th>
+                                <th>Monitor</th>
+                                <th>Día</th>
+                                <th>Hora</th>
+                                <th>Total Reservas</th>
+                                <th>Asistencias</th>
+                                <th>% Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases_con_asistencia %}
+                            <tr>
+                                <td><strong>{{ clase.nombre }}</strong></td>
+                                <td>{{ clase.monitor.nombre_completo|default:"Sin monitor" }}</td>
+                                <td>{{ clase.get_dia_semana_display }}</td>
+                                <td>{{ clase.hora_inicio|time:"H:i" }}</td>
+                                <td><span class="badge bg-primary">{{ clase.total_reservas }}</span></td>
+                                <td><span class="badge bg-success">{{ clase.total_asistencias }}</span></td>
+                                <td>
+                                    {% widthratio clase.total_asistencias clase.total_reservas 100 as porcentaje %}
+                                    {% if clase.total_reservas > 0 %}
+                                        <div class="progress" style="height: 25px;">
+                                            <div class="progress-bar
+                                                {% if porcentaje >= 80 %}bg-success
+                                                {% elif porcentaje >= 50 %}bg-warning
+                                                {% else %}bg-danger{% endif %}"
+                                                role="progressbar"
+                                                style="width: {{ porcentaje }}%"
+                                                aria-valuenow="{{ porcentaje }}"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100">
+                                                {{ porcentaje }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Sin datos</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No hay datos de asistencia</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="javascript:history.back()" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <button class="btn btn-success" onclick="window.print()">
+            <i class="bi bi-printer"></i> Imprimir Reporte
+        </button>
+    </div>
+</div>
+{% endblock %}

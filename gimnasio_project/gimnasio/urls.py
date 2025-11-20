@@ -28,7 +28,6 @@ urlpatterns = [
     # ===== CLASES =====
 
     path('clases/nueva/', views.NuevaClaseView.as_view(), name='nueva_clase'),
-    #path('clases/<int:pk>/', views.DetalleClaseView.as_view(), name='detalle_clase'),
     path('clases/', views.ListadoClasesView.as_view(), name='listado_clases'),
     path('clases/<int:pk>/editar/', views.EditarClaseView.as_view(), name='editar_clase'),
     path('clases/<int:pk>/eliminar/', views.EliminarClaseView.as_view(), name='eliminar_clase'),
@@ -64,7 +63,8 @@ urlpatterns = [
 
     # ===== ESTADÍSTICAS (ADMIN) =====
     path('estadisticas/', views.EstadisticasView.as_view(), name='estadisticas'),
-    path('reportes/', views.ReportesView.as_view(), name='reportes'),
+    path('reportes/asistencia/', views.ReporteAsistenciaView.as_view(), name='reporte_asistencia'),
+    path('reportes/ingresos/', views.ReporteIngresosView.as_view(), name='reporte_ingresos'),
 
 
 ]

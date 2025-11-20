@@ -355,7 +355,8 @@ class ListadoClasesView(ListView):
     context_object_name = 'clases'
 
     def get_queryset(self):
-        queryset = Clase.objects.filter(activa=True).select_related('monitor')
+        # Solo mostrar clases activas con monitores activos
+        queryset = Clase.objects.filter(activa=True, monitor__activo=True).select_related('monitor')
 
         # Filtros
         dia = self.request.GET.get('dia')
@@ -376,36 +377,6 @@ class ListadoClasesView(ListView):
         context['monitores'] = Monitor.objects.filter(activo=True)
         return context
 
-class DetalleClaseView(DetailView):
-    model = Clase
-    template_name = 'gimnasio/detalle_socio.html'
-    context_object_name = 'clase'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Verificar si el usuario ya tiene reserva activa
-        if self.request.user.is_authenticated:
-            tiene_reserva = Reserva.objects.filter(
-                socio=self.request.user,
-                clase=self.object,
-                cancelada=False,
-                fecha__gte=timezone.now().date()
-            ).exists()
-            context['tiene_reserva'] = tiene_reserva
-
-        # Próximas sesiones de esta clase (siguientes 4 semanas)
-        proximas_fechas = []
-        hoy = timezone.now().date()
-        for i in range(28):  # 4 semanas
-            fecha = hoy + timedelta(days=i)
-            # Mapear día de la semana (0=Lunes, 6=Domingo)
-            dia_codigo = ['L', 'M', 'X', 'J', 'V', 'S', 'D'][fecha.weekday()]
-            if dia_codigo == self.object.dia_semana:
-                proximas_fechas.append(fecha)
-
-        context['proximas_fechas'] = proximas_fechas[:8]  # Solo mostrar 8
-        return context
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
@@ -514,7 +485,11 @@ class MisReservasView(View):
         # Preparar próximas clases disponibles
         proximas_clases = []
         hoy = timezone.now().date()
-        clases_activas = Clase.objects.filter(activa=True).order_by('dia_semana', 'hora_inicio')
+        # Solo mostrar clases con monitores activos
+        clases_activas = Clase.objects.filter(
+            activa=True,
+            monitor__activo=True
+        ).order_by('dia_semana', 'hora_inicio')
 
         dias = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
         for clase in clases_activas:
@@ -733,6 +708,9 @@ class DetalleSocioView(View):
         # Actualizar datos del perfil
         perfil.telefono = request.POST.get('telefono')
         perfil.direccion = request.POST.get('direccion')
+
+        # Actualizar campo activo desde el checkbox
+        perfil.activo = 'activo' in request.POST
 
         # foto
         if request.FILES.get('foto'):
@@ -1072,22 +1050,27 @@ class SociosApuntadosView(View):
             return redirect('gimnasio:inicio')
 
 
-@method_decorator([login_required, admin_required], name='dispatch')
-class ReportesView(View):
-    def get(self, request):
-        # Generar reportes más detallados
-        hoy = timezone.now().date()
-        mes_actual = hoy.month
-        year_actual = hoy.year
 
-        # Reporte de asistencia por clase
+# Reporte de Asistencia por Clases
+@method_decorator([login_required, admin_required], name='dispatch')
+class ReporteAsistenciaView(View):
+    def get(self, request):
         clases_con_asistencia = Clase.objects.filter(activa=True).annotate(
             total_reservas=Count('reservas', filter=Q(reservas__cancelada=False)),
             total_asistencias=Count('reservas', filter=Q(reservas__asistio=True))
         )
+        context = {
+            'clases_con_asistencia': clases_con_asistencia,
+        }
+        return render(request, 'gimnasio/reporte_asistencia.html', context)
 
-        # Reporte de ingresos por mes
+# Reporte de Ingresos de los últimos 6 meses
+@method_decorator([login_required, admin_required], name='dispatch')
+class ReporteIngresosView(View):
+    def get(self, request):
+        hoy = timezone.now().date()
         ingresos_por_mes = []
+        total_acumulado = 0
         for i in range(6):
             mes = hoy - timedelta(days=30 * i)
             total = Pago.objects.filter(
@@ -1099,10 +1082,9 @@ class ReportesView(View):
                 'mes': mes.strftime('%B %Y'),
                 'total': total
             })
-
+            total_acumulado += total
         context = {
-            'clases_con_asistencia': clases_con_asistencia,
             'ingresos_por_mes': ingresos_por_mes,
+            'total_acumulado': total_acumulado,
         }
-
-        return render(request, 'gimnasio/reportes.html', context)
+        return render(request, 'gimnasio/reporte_ingresos.html', context)
