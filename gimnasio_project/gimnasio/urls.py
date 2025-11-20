@@ -46,7 +46,7 @@ urlpatterns = [
     # ===== GESTIÓN SOCIOS (ADMIN) =====
     path('usuarios/', views.GestionSocioView.as_view(), name='gestion_usuarios'),
     path('usuarios/nuevo/', views.NuevoSocioView.as_view(), name='nuevo_usuario'),
-    path('usuarios/<int:pk>/editar/', views.EditarSocioView.as_view(), name='editar_usuario'),
+    path('usuarios/<int:pk>/', views.DetalleSocioView.as_view(), name='detalle_socio'),
     path('usuarios/<int:pk>/desactivar/', views.DesactivarSocioView.as_view(), name='desactivar_usuario'),
 
     # ===== GESTIÓN PAGOS (ADMIN) =====

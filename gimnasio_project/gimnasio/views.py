@@ -378,7 +378,7 @@ class ListadoClasesView(ListView):
 
 class DetalleClaseView(DetailView):
     model = Clase
-    template_name = 'gimnasio/detalle_clase.html'
+    template_name = 'gimnasio/detalle_socio.html'
     context_object_name = 'clase'
 
     def get_context_data(self, **kwargs):
@@ -653,26 +653,19 @@ class GestionSocioView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = PerfilUsuario.objects.select_related('user').filter(rol='socio')
-
-        # Filtros
-        busqueda = self.request.GET.get('q')
+        queryset = PerfilUsuario.objects.filter(rol='socio').order_by('-fecha_registro')
+        search = self.request.GET.get('search')
         estado = self.request.GET.get('estado')
-
-        if busqueda:
+        if search:
             queryset = queryset.filter(
-                Q(user__username__icontains=busqueda) |
-                Q(user__first_name__icontains=busqueda) |
-                Q(user__last_name__icontains=busqueda) |
-                Q(dni__icontains=busqueda)
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__email__icontains=search) |
+                Q(dni__icontains=search)
             )
-
-        if estado == 'activo':
-            queryset = queryset.filter(activo=True)
-        elif estado == 'inactivo':
-            queryset = queryset.filter(activo=False)
-
-        return queryset.order_by('-fecha_registro')
+        if estado in ['activo', 'inactivo']:
+            queryset = queryset.filter(activo=(estado == 'activo'))
+        return queryset
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
@@ -721,10 +714,11 @@ class NuevoSocioView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-class EditarSocioView(View):
+@method_decorator([login_required, admin_required], name='dispatch')
+class DetalleSocioView(View):
     def get(self, request, pk):
         perfil = get_object_or_404(PerfilUsuario, pk=pk)
-        return render(request, 'gimnasio/editar_usuario.html', {'perfil': perfil})
+        return render(request, 'gimnasio/detalle_socio.html', {'perfil': perfil})
 
     def post(self, request, pk):
         perfil = get_object_or_404(PerfilUsuario, pk=pk)
@@ -739,11 +733,15 @@ class EditarSocioView(View):
         # Actualizar datos del perfil
         perfil.telefono = request.POST.get('telefono')
         perfil.direccion = request.POST.get('direccion')
+
+        # foto
+        if request.FILES.get('foto'):
+            perfil.foto = request.FILES['foto']
+
         perfil.save()
 
         messages.success(request, 'Usuario actualizado correctamente.')
         return redirect('gimnasio:gestion_usuarios')
-
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class DesactivarSocioView(View):
@@ -755,7 +753,6 @@ class DesactivarSocioView(View):
         estado = "activado" if perfil.activo else "desactivado"
         messages.success(request, f'Usuario {estado} correctamente.')
         return redirect('gimnasio:gestion_usuarios')
-
 
 # ============================================
 # GESTIÓN DE PAGOS (ADMIN)
@@ -855,18 +852,21 @@ class NuevoPagoView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
+@method_decorator([login_required, admin_required], name='dispatch')
 class MarcarPagadoView(View):
     def post(self, request, pk):
         pago = get_object_or_404(Pago, pk=pk)
-        metodo_pago = request.POST.get('metodo_pago')
 
-        if not metodo_pago:
-            messages.error(request, 'Debes seleccionar un método de pago.')
-            return redirect('gimnasio:gestion_pagos')
+        # Obtener método de pago enviado desde el formulario
+        metodo_pago = request.POST.get('metodo_pago', 'efectivo')
 
-        pago.marcar_pagado(metodo_pago)
+        # Actualizar estado del pago
+        pago.estado = 'pagado'
+        pago.metodo_pago = metodo_pago
+        pago.fecha_pago = timezone.now()
+        pago.save()
 
-        messages.success(request, f'Pago de {pago.socio.get_full_name()} marcado como pagado correctamente.')
+        messages.success(request, 'El pago ha sido marcado como pagado correctamente.')
         return redirect('gimnasio:gestion_pagos')
 
 
