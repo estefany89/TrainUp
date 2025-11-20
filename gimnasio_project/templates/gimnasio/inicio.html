@@ -181,17 +181,35 @@
         </div>
     </div>
 </section>
-
-
 <!-- =======================================
         FAQ
 ======================================= -->
+
 <section id="faq" class="py-5">
     <div class="container">
-        <h2 class="text-center mb-4">Preguntas Frecuentes</h2>
-        <p class="text-center">Aquí puedes poner tus FAQ...</p>
+
+        <!-- Línea naranja arriba -->
+        <div style="height: 6px; background-color: #FF6B35; width: 500px; margin-bottom: 20px;"></div>
+
+        <h2 class="text-left mb-4 text-white">Preguntas Frecuentes</h2>
+
+        <!-- Botones FAQ -->
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            <button class="faq-btn" data-target="entrenamiento">Entrenamiento</button>
+            <button class="faq-btn" data-target="tarifas">Tarifas</button>
+            <button class="faq-btn" data-target="compromiso">Compromiso Usuario</button>
+        </div>
+
+        <!-- Contenido dinámico -->
+        <div id="faq-content" class="text-white text-center fs-5" style="transition: opacity 0.3s;"></div>
+
     </div>
 </section>
+
+<script src="{% static 'gimnasio/js/faq.js' %}"></script>
+
+
+
 
 <!-- =======================================
         CONTACTO
@@ -290,12 +308,37 @@
           border-radius: 0.5rem;
         }
 
+
+        /* ===== Texto de encabezados ===== */
         h2, h3, p.lead, #tour p {
             color: white;
         }
         #tour {
             margin-top: 300px;
         }
+
+        /* ===== FAQ BUTTONS ===== */
+        .faq-btn {
+        background-color: #3a3a3a;      /* gris */
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        min-width: 200px;               /* más anchos */
+        font-size: 1.1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        }
+
+        .faq-btn:hover {
+        background-color: #555555;
+        }
+
+        .faq-btn.active {
+        background-color: #FF6B35 !important; /* naranja */
+        color: #000;                          /* texto negro */
+        }
+
 
 </style>
 
