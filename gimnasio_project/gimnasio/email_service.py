@@ -1,5 +1,7 @@
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import os
+#llama a .env de contraseñas
 
 
 class EmailService:
