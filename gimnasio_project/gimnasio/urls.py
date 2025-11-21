@@ -10,7 +10,7 @@ urlpatterns = [
     # ===== AUTENTICACIÓN =====
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
-    path('registro/', views.RegistroView.as_view(), name='registro'),
+    #path('registro/', views.RegistroView.as_view(), name='registro'),
 
     # ===== PERFIL USUARIO =====
     path('perfil/', views.PerfilView.as_view(), name='perfil'),

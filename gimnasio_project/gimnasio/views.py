@@ -53,7 +53,7 @@ class LogoutView(View):
         logout(request)
         messages.success(request, "Has cerrado sesión correctamente.")
         return redirect('gimnasio:login')
-
+'''
 class RegistroView(View):
     def get(self, request):
         return render(request, 'gimnasio/registro.html')
@@ -118,7 +118,7 @@ class RegistroView(View):
         messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
         return redirect('gimnasio:login')
 
-
+'''
 # ============================================
 # PÁGINA DE INICIO
 # ============================================
