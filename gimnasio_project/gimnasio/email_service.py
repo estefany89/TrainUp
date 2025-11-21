@@ -1,13 +1,12 @@
+from decouple import config
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-import os
-#llama a .env de contraseñas
-
 
 class EmailService:
-    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-    FROM_EMAIL = os.environ.get('FROM_EMAIL')
-    TEMPLATE_ID_BIENVENIDA = os.environ.get('TEMPLATE_ID_BIENVENIDA')
+    SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+    FROM_EMAIL = config('FROM_EMAIL')
+    TEMPLATE_ID_BIENVENIDA = config('TEMPLATE_ID_BIENVENIDA')
+
 
     def __init__(self, to_email, template_id=None, template_data=None):
         self.to_email = to_email
