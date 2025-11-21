@@ -5,6 +5,7 @@ venv/
 # === CONFIGURACIÓN / VARIABLES DE ENTORNO ===
 .env
 
+
 # === ARCHIVOS PYTHON COMPILADOS ===
 *.pyc
 __pycache__/
