@@ -28,8 +28,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            margin: 0;
-            padding: 0;
         }
 
         .navbar {
@@ -83,14 +81,12 @@
             transform: translateY(-5px);
         }
 
-        /* MAIN SIN MÁRGENES */
+        /* MAIN Y FOOTER SIN ESPACIOS */
         main {
             flex: 1;
             margin: 0 !important;
-            padding: 0 !important;
         }
 
-        /* Excepto cuando tiene la clase container */
         main.container {
             padding: 1rem !important;
         }
@@ -100,7 +96,6 @@
             margin-bottom: 0 !important;
         }
 
-        /* FOOTER SIN MARGEN SUPERIOR */
         footer {
             background-color: #FF6B35;
             color: white;
@@ -145,12 +140,14 @@
                                     <i class="bi bi-person-badge"></i> Monitores
                                 </a>
                                 <ul class="dropdown-menu">
+                                    <!-- Gestión Monitor -->
                                     <li>
                                         <a class="dropdown-item" href="{% url 'gimnasio:gestion_monitores' %}">
                                             <i class="bi bi-person-plus-fill"></i> Gestión Monitor
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
+                                    <!-- SUBMENÚ Asignar Clases -->
                                     <li class="dropdown-submenu">
                                         <a class="dropdown-item dropdown-toggle" href="#">
                                             <i class="bi bi-calendar-plus"></i> Asignar Clases
@@ -222,6 +219,7 @@
                                 </ul>
                             </li>
 
+
                         {% elif user.perfil.rol == 'monitor' %}
                             <!-- ========== MENÚ MONITOR ========== -->
                             <li class="nav-item dropdown">
@@ -255,7 +253,7 @@
                                     <i class="bi bi-credit-card"></i> Mis Pagos
                                 </a>
                             </li>
-                        {% endif %}
+                    {% endif %}
                     {% endif %}
                 </ul>
 
@@ -286,36 +284,41 @@
             </div>
         </div>
     </nav>
-
-    <main class="{% block main_class %}container my-4{% endblock %}">
-        {% if messages %}
-          <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-            {% for message in messages %}
-              <div class="toast align-items-center text-bg-{{ message.tags }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                  <div class="toast-body">
-                    {{ message }}
+        <main class="{% block main_class %}container my-4{% endblock %}">
+            {% if messages %}
+              <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+                {% for message in messages %}
+                  <div class="toast align-items-center text-bg-{{ message.tags }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                      <div class="toast-body">
+                        {{ message }}
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
                   </div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
+                {% endfor %}
               </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
 
-    <footer class="text-center">
-        <div class="container">
-            <div style="height: 4px; background-color: white; width: 100px; margin: 0 auto 10px auto;"></div>
-            <p class="mb-0">
-                <i class="bi bi-heart-pulse-fill"></i> TrainUp &copy; 2025 - Tu gimnasio
-            </p>
-            <p class="mb-0 mt-2">
-                <small>Desarrollado por Estefany Silva</small>
-            </p>
-        </div>
-    </footer>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+
+<footer class="text-center" style="background-color: #FF6B35; color: white; padding: 2rem 0; border-top: none;">
+    <div class="container">
+        <!-- Línea decorativa blanca para contraste -->
+        <div style="height: 4px; background-color: white; width: 100px; margin: 0 auto 10px auto;"></div>
+
+        <p class="mb-0">
+            <i class="bi bi-heart-pulse-fill"></i> TrainUp &copy; 2025 - Tu gimnasio
+        </p>
+        <p class="mb-0 mt-2">
+            <small>Desarrollado por Estefany Silva</small>
+        </p>
+    </div>
+</footer>
+
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -334,6 +337,7 @@
                 var subDropdown = submenu.querySelector('.dropdown-menu');
                 subDropdown.classList.toggle('show');
 
+                // Cerrar otros submenús abiertos
                 dropdownSubmenus.forEach(function(other) {
                     if (other !== submenu) {
                         other.querySelector('.dropdown-menu')?.classList.remove('show');
@@ -342,6 +346,7 @@
             });
         });
 
+        // Cerrar submenús al cerrar el dropdown principal
         var dropdowns = document.querySelectorAll('.dropdown');
         dropdowns.forEach(function(drop) {
             drop.addEventListener('hidden.bs.dropdown', function () {
@@ -353,14 +358,14 @@
     </script>
 
     <script>
-    // Mensajes de notificación
+        //Mensajes de notificación
     document.addEventListener('DOMContentLoaded', function () {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-        toastElList.map(function (toastEl) {
-            var toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-            toast.show();
-        });
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.map(function (toastEl) {
+        var toast = new bootstrap.Toast(toastEl, { delay: 4000 }); // desaparece a los 4s
+        toast.show();
     });
-    </script>
+    });
+</script>
 </body>
 </html>
