@@ -16,7 +16,6 @@ from django.db import IntegrityError, transaction
 from .models import PerfilUsuario, Monitor, Clase, Reserva, Pago
 from .decorators import admin_required, socio_required
 
-
 # ============================================
 # AUTENTICACIÓN
 # ============================================
@@ -30,6 +29,11 @@ class LoginView(View):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        # Validación para evitar None o vacíos
+        if not username or not password:
+            messages.error(request, 'Debes ingresar usuario y contraseña.')
+            return render(request, 'gimnasio/login.html')
+
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
@@ -41,12 +45,14 @@ class LoginView(View):
             return render(request, 'gimnasio/login.html')
 
 
+# ============================================
+# CERRAR SESIÓN
+# ============================================
 class LogoutView(View):
     def get(self, request):
         logout(request)
-        messages.info(request, 'Has cerrado sesión correctamente.')
+        messages.success(request, "Has cerrado sesión correctamente.")
         return redirect('gimnasio:login')
-
 
 class RegistroView(View):
     def get(self, request):
