@@ -25,3 +25,6 @@ staticfiles/
 # === ARCHIVOS DEL SISTEMA ===
 .DS_Store
 Thumbs.db
+
+
+backup-repo.git/
