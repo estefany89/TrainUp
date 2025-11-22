@@ -81,19 +81,38 @@
             transform: translateY(-5px);
         }
 
+                * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         /* MAIN Y FOOTER SIN ESPACIOS */
         main {
             flex: 1;
-            margin: 0 !important;
         }
 
+        /* Para páginas normales con container */
         main.container {
-            padding: 1rem !important;
+            padding: 1rem;
+            max-width: 1140px;
+            margin: 0 auto;
         }
 
         main.my-4 {
             margin-top: 1.5rem !important;
             margin-bottom: 0 !important;
+        }
+        /* Para la página de inicio sin padding */
+        main.p-0 {
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
         footer {
