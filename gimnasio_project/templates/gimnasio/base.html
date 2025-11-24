@@ -275,7 +275,7 @@
                     {% endif %}
                     {% endif %}
                 </ul>
-
+                 <!-- ========== MENÚ MI PERFIL ========== -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
@@ -303,6 +303,8 @@
             </div>
         </div>
     </nav>
+
+        <!-- Mensajes de Django como toasts flotantes -->
         <main class="{% block main_class %}container my-4{% endblock %}">
             {% if messages %}
               <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
@@ -322,12 +324,10 @@
             {% block content %}{% endblock %}
         </main>
 
+     <!-- ========== FOOTER ========== -->
 <footer class="text-center" style="background-color: #FF6B35; color: white; padding: 2rem 0; border-top: none;">
     <div class="container">
-        <!-- Línea decorativa blanca para contraste -->
-        <div style="height: 4px; background-color: white; width: 100px; margin: 0 auto 10px auto;"></div>
-
-        <p class="mb-0">
+          <p class="mb-0">
             <i class="bi bi-heart-pulse-fill"></i> TrainUp &copy; 2025 - Tu gimnasio
         </p>
         <p class="mb-0 mt-2">
