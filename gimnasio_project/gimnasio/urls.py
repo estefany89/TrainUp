@@ -66,6 +66,7 @@ urlpatterns = [
     path('reportes/asistencia/', views.ReporteAsistenciaView.as_view(), name='reporte_asistencia'),
     path('reportes/ingresos/', views.ReporteIngresosView.as_view(), name='reporte_ingresos'),
 
-
+    # ===FACTURA DE PAGOS ===
+    path('factura/<int:pk>/', views.GenerarFacturaView.as_view(), name='generar_factura'),
 ]
 

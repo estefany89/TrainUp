@@ -1,5 +1,5 @@
 from django.db import models
-from .email_service import EmailService
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, DetailView
@@ -10,11 +10,22 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from datetime import datetime, timedelta
 from django.db import IntegrityError, transaction
+
+# Importaciones para PDF
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
+from io import BytesIO
+
 from .models import PerfilUsuario, Monitor, Clase, Reserva, Pago
 from .decorators import admin_required, socio_required
+from .email_service import EmailService
 
 # ============================================
 # AUTENTICACIÓN
@@ -621,6 +632,148 @@ class DetallePagoView(DetailView):
 
     def get_queryset(self):
         return Pago.objects.filter(socio=self.request.user)
+
+
+@method_decorator([login_required, socio_required], name='dispatch')
+class GenerarFacturaView(View):
+    """Vista para generar y descargar factura en PDF de un pago"""
+
+    def get(self, request, pk):
+        # Obtener el pago y verificar que pertenece al usuario
+        pago = get_object_or_404(Pago, pk=pk, socio=request.user)
+
+        # Verificar que el pago esté pagado
+        if pago.estado != 'pagado':
+            messages.error(request, 'Este pago aún no ha sido procesado.')
+            return redirect('gimnasio:mis_pagos')
+
+        # Crear el PDF en memoria
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#FF6B35'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        )
+
+        # Título
+        elements.append(Paragraph("FACTURA", title_style))
+        elements.append(Spacer(1, 0.3 * inch))
+
+        # Información del gimnasio
+        gym_info = [
+            ["TrainUp Gym"],
+            ["Calle Fitness, 123"],
+            ["11403 Jerez de la Frontera"],
+            ["CIF: B12345678"],
+            ["Tel: +34 123 456 789"]
+        ]
+        gym_table = Table(gym_info, colWidths=[3 * inch])
+        gym_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),  # Primera fila en negrita
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (0, 0), 12),  # Nombre del gym más grande
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ]))
+        elements.append(gym_table)
+        elements.append(Spacer(1, 0.3 * inch))
+
+        # Información de la factura
+        factura_data = [
+            ["Número de Factura:", f"FAC-{pago.id:05d}"],
+            ["Fecha de Emisión:", pago.fecha_emision.strftime("%d/%m/%Y")],
+            ["Fecha de Pago:", pago.fecha_pago.strftime("%d/%m/%Y") if pago.fecha_pago else "N/A"],
+        ]
+        factura_table = Table(factura_data, colWidths=[2 * inch, 3 * inch])
+        factura_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        elements.append(factura_table)
+        elements.append(Spacer(1, 0.3 * inch))
+
+        # Información del cliente
+        cliente_info = [
+            ["CLIENTE"],
+            [f"{pago.socio.get_full_name() or pago.socio.username}"],
+            [f"Email: {pago.socio.email}"],
+        ]
+        cliente_table = Table(cliente_info, colWidths=[5 * inch])
+        cliente_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F0F0')),
+        ]))
+        elements.append(cliente_table)
+        elements.append(Spacer(1, 0.5 * inch))
+
+        # Detalle del pago
+        detalle_data = [
+            ["Concepto", "Importe"],
+            [pago.concepto, f"{pago.importe:.2f}€"],
+        ]
+        detalle_table = Table(detalle_data, colWidths=[4 * inch, 1.5 * inch])
+        detalle_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FF6B35')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(detalle_table)
+        elements.append(Spacer(1, 0.3 * inch))
+
+        # Total
+        total_data = [
+            ["TOTAL", f"{pago.importe:.2f}€"],
+        ]
+        total_table = Table(total_data, colWidths=[4 * inch, 1.5 * inch])
+        total_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 14),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#FF6B35')),
+            ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor('#FF6B35')),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(total_table)
+        elements.append(Spacer(1, 0.5 * inch))
+
+        # Nota de agradecimiento
+        nota = Paragraph(
+            "<i>Gracias por confiar en TrainUp.</i>",
+            ParagraphStyle('nota', alignment=TA_CENTER, fontSize=10, textColor=colors.grey)
+        )
+        elements.append(nota)
+
+        # Construir PDF
+        doc.build(elements)
+
+        # Preparar respuesta
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Factura_{pago.id}_{pago.socio.username}.pdf"'
+
+        return response
 
 
 # ============================================
