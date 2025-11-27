@@ -10,10 +10,13 @@
     <link rel="stylesheet" href="{% static 'gimnasio/css/flip.css' %}">
     <style>
         :root {
-            --primary-color: #FF6B35;
-            --secondary-color: #FF4500;
-            --accent-color: #FF8C42;
-            --success-color: #2ECC71;
+            --primary-color: #9EF01A;
+            --secondary-color: #006400;
+            --accent-color: #70E000;
+            --light-accent: #CCFF33;
+            --bright-accent: #9EF01A;
+            --dark-green: #004B23;
+            --success-color: #9EF01A;
             --danger-color: #E74C3C;
         }
 
@@ -31,7 +34,7 @@
         }
 
         .navbar {
-            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            background: linear-gradient(135deg, #70E000, #9EF01A);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
@@ -66,8 +69,10 @@
         }
 
         .btn-primary:hover {
-            background-color: #E85A2A;
-            border-color: #E85A2A;
+            background: linear-gradient(135deg, #CCFF33, #9EF01A);
+            border-color: #CCFF33;
+            box-shadow: 0 0 20px rgba(204, 255, 51, 0.5);
+            transform: translateY(-2px);
         }
 
         .card {
@@ -79,12 +84,6 @@
 
         .card:hover {
             transform: translateY(-5px);
-        }
-
-                * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
 
         body {
@@ -116,11 +115,12 @@
         }
 
         footer {
-            background-color: #FF6B35;
-            color: white;
+            background: linear-gradient(135deg, #70E000, #9EF01A);
+            color: #000;
             padding: 2rem 0;
             margin-top: 0 !important;
             border-top: none;
+            box-shadow: 0 -4px 20px rgba(158, 240, 26, 0.3);
         }
 
         .dropdown-submenu {
@@ -325,13 +325,13 @@
         </main>
 
      <!-- ========== FOOTER ========== -->
-<footer class="text-center" style="background-color: #FF6B35; color: white; padding: 2rem 0; border-top: none;">
+<footer class="text-center" style="background: linear-gradient(135deg, #70E000, #9EF01A); color: #000; padding: 2rem 0; border-top: none; box-shadow: 0 -4px 20px rgba(158, 240, 26, 0.3);">
     <div class="container">
-          <p class="mb-0">
+          <p class="mb-0" style="font-weight: 600;">
             <i class="bi bi-heart-pulse-fill"></i> TrainUp &copy; 2025 - Tu gimnasio
         </p>
         <p class="mb-0 mt-2">
-            <small>Desarrollado por Estefany Silva</small>
+            <small style="font-weight: 500;">Desarrollado por Estefany Silva</small>
         </p>
     </div>
 </footer>
