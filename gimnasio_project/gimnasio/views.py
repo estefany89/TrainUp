@@ -64,51 +64,7 @@ class LogoutView(View):
         logout(request)
         messages.success(request, "Has cerrado sesión correctamente.")
         return redirect('gimnasio:login')
-'''
-class RegistroView(View):
-    def get(self, request):
-        return render(request, 'gimnasio/registro.html')
-
-    def post(self, request):
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        password2 = request.POST.get('password2')
-        nombre = request.POST.get('nombre')
-        apellidos = request.POST.get('apellidos')
-        telefono = request.POST.get('telefono')
-        dni = request.POST.get('dni')
-
-        # Validaciones
-        if password != password2:
-            messages.error(request, 'Las contraseñas no coinciden.')
-            return render(request, 'gimnasio/registro.html')
-
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'El nombre de usuario ya existe.')
-            return render(request, 'gimnasio/registro.html')
-
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'El email ya está registrado.')
-            return render(request, 'gimnasio/registro.html')
-
-        # Crear usuario
-        user = User.objects.create(
-            username=username,
-            email=email,
-            password=make_password(password),
-            first_name=nombre,
-            last_name=apellidos
-        )
-
-        # Crear perfil
-        PerfilUsuario.objects.create(
-            user=user,
-            telefono=telefono,
-            dni=dni,
-            rol='socio'
-        )
-
+'''''
         # -------------------------------
         # Enviar correo de bienvenida
         # -------------------------------
