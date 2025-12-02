@@ -120,3 +120,22 @@ LOGIN_URL = 'gimnasio:login'
 LOGIN_REDIRECT_URL = 'gimnasio:inicio'
 #LOGOUT_REDIRECT_URL = 'login'
 
+
+# Configuración de Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@trainupgym.com'
+
+# Para producción (Gmail):
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tu_email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'tu_contraseña_app'
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',  # siempre retorna JSON
+        'rest_framework.renderers.BrowsableAPIRenderer',  # interfaz web
+    )
+}
