@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -118,3 +119,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'gimnasio:login'
 LOGIN_REDIRECT_URL = 'gimnasio:inicio'
 #LOGOUT_REDIRECT_URL = 'login'
+
