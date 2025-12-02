@@ -783,7 +783,7 @@ class NuevoSocioView(View):
         )
 
         # Enviar email con credenciales
-        email_enviado = EmailService.enviar_bienvenida_socio(user, password_generada, username)
+        email_enviado = EmailService.enviar_bienvenida_socio(user, password_generada)
 
         if email_enviado:
             messages.success(request, f'Socio creado correctamente. Se ha enviado un email con las credenciales.')
