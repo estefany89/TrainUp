@@ -1,6 +1,8 @@
 from django.urls import path
-from . import views
+from rest_framework.decorators import api_view
 
+from . import views
+from . import autenticacion_views  # NUEVA LÍNEA
 app_name = 'gimnasio'
 
 urlpatterns = [
@@ -68,5 +70,5 @@ urlpatterns = [
 
     # ===FACTURA DE PAGOS ===
     path('factura/<int:pk>/', views.GenerarFacturaView.as_view(), name='generar_factura'),
-]
 
+]

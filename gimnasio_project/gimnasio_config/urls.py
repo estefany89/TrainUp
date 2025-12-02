@@ -25,6 +25,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('gimnasio.urls')),
+    path('api/', include('gimnasio.api_urls')),
 ]
 
 # Servir archivos media en desarrollo

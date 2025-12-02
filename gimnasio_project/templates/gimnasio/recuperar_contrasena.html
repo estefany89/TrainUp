@@ -1,0 +1,22 @@
+<form id="recuperarForm">
+  <input type="email" id="email" placeholder="Tu email" required>
+  <button type="submit">Recuperar contraseña</button>
+</form>
+
+<div id="respuesta"></div>
+
+<script>
+document.getElementById('recuperarForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+
+  const res = await fetch('/api/recuperar-contrasena/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+  document.getElementById('respuesta').innerText = data.message || data.error;
+});
+</script>
