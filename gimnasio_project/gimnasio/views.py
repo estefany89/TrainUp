@@ -803,7 +803,7 @@ class NuevoSocioView(View):
         return redirect('gimnasio:gestion_usuarios')
 
 
-@method_decorator([login_required, admin_required], name='dispatch')
+
 @method_decorator([login_required, admin_required], name='dispatch')
 class DetalleSocioView(View):
     def get(self, request, pk):
