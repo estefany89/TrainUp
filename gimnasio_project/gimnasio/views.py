@@ -64,28 +64,7 @@ class LogoutView(View):
         logout(request)
         messages.success(request, "Has cerrado sesión correctamente.")
         return redirect('gimnasio:login')
-'''''
-        # -------------------------------
-        # Enviar correo de bienvenida
-        # -------------------------------
-        from datetime import datetime
-        from .email_service import EmailService
 
-        template_data = {
-            'name': f'{nombre} {apellidos}',
-            'fecha': datetime.now().strftime("%d/%m/%Y")
-        }
-
-        try:
-            email_service = EmailService(to_email=email, template_data=template_data)
-            email_service.send()
-        except Exception as e:
-            print(f"Error enviando correo: {e}")
-
-        messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión.')
-        return redirect('gimnasio:login')
-
-'''
 # ============================================
 # PÁGINA DE INICIO
 # ============================================
@@ -764,45 +743,54 @@ class NuevoSocioView(View):
         return render(request, 'gimnasio/nuevo_socio.html')
 
     def post(self, request):
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        import random
+        import string
+
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
+        email = request.POST.get('email')
         telefono = request.POST.get('telefono')
         dni = request.POST.get('dni')
-        rol = request.POST.get('rol', 'socio')
 
-        # Validaciones
+        # Generar username automáticamente
+        username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'El nombre de usuario ya existe.')
-            return render(request, 'gimnasio/nuevo_socio.html')
+            username = f"{username}{random.randint(1, 999)}"
 
+        # Validar email único
         if User.objects.filter(email=email).exists():
             messages.error(request, 'El email ya está registrado.')
             return render(request, 'gimnasio/nuevo_socio.html')
+
+        # Generar contraseña aleatoria
+        password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
         # Crear usuario
         user = User.objects.create(
             username=username,
             email=email,
-            password=make_password(password),
+            password=make_password(password_generada),
             first_name=nombre,
             last_name=apellidos
         )
 
-        # Crear perfil
+        # Crear perfil de socio
         PerfilUsuario.objects.create(
             user=user,
             telefono=telefono,
             dni=dni,
-            rol=rol
+            rol='socio'
         )
 
-        messages.success(request, 'Usuario creado correctamente.')
-        return redirect('gimnasio:gestion_usuarios')
+        # Enviar email con credenciales
+        email_enviado = EmailService.enviar_bienvenida_socio(user, password_generada, username)
 
+        if email_enviado:
+            messages.success(request, f'Socio creado correctamente. Se ha enviado un email con las credenciales.')
+        else:
+            messages.warning(request, f'Socio creado, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
 
+        return redirect('gimnasio:gestion_socios')
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class DetalleSocioView(View):
@@ -834,7 +822,7 @@ class DetalleSocioView(View):
         perfil.save()
 
         messages.success(request, 'Usuario actualizado correctamente.')
-        return redirect('gimnasio:gestion_usuarios')
+        return redirect('gimnasio:gestion_socios')
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class DesactivarSocioView(View):
@@ -845,7 +833,7 @@ class DesactivarSocioView(View):
 
         estado = "activado" if perfil.activo else "desactivado"
         messages.success(request, f'Usuario {estado} correctamente.')
-        return redirect('gimnasio:gestion_usuarios')
+        return redirect('gimnasio:gestion_socios')
 
 # ============================================
 # GESTIÓN DE PAGOS (ADMIN)
