@@ -933,7 +933,6 @@ class NuevoPagoView(View):
 
 
 @method_decorator([login_required, admin_required], name='dispatch')
-@method_decorator([login_required, admin_required], name='dispatch')
 class MarcarPagadoView(View):
     def post(self, request, pk):
         pago = get_object_or_404(Pago, pk=pk)
