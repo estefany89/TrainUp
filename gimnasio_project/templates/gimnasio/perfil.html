@@ -8,7 +8,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 50%, #ffa600 100%);
+            background: #000000;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,14 +22,14 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background: white;
-            color: #ff6b35;
+            background: #CCFF33;
+            color: #000000;
             border: none;
             width: 45px;
             height: 45px;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(204, 255, 51, 0.3);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -40,8 +40,8 @@
 
         .btn-home:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            background: #fff5f2;
+            box-shadow: 0 6px 25px rgba(204, 255, 51, 0.5);
+            background: #9EF01A;
         }
 
         .btn-home svg {
@@ -51,13 +51,15 @@
 
         /* Contenedor principal */
         .perfil-container {
-            background: white;
+            background: #ffffff;
             border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-            max-width: 500px; /* Más angosto */
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
             width: 100%;
             overflow: hidden;
             animation: fadeInUp 0.6s ease;
+            position: relative;
+            border: 1px solid #1a1a1a;
         }
 
         @keyframes fadeInUp {
@@ -65,12 +67,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Header con fondo naranja */
+        /* Header con fondo negro */
         .perfil-header {
-            background: linear-gradient(135deg, #ff6b35, #ff8c42);
-            padding: 60px 40px 120px;
+            background: #000000;
+            padding: 40px 40px 100px;
             position: relative;
             text-align: center;
+            overflow: hidden;
         }
 
         .perfil-header::after {
@@ -82,6 +85,7 @@
             height: 60px;
             background: white;
             border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            z-index: 1;
         }
 
         /* Foto de perfil */
@@ -92,79 +96,101 @@
             z-index: 10;
         }
 
+        .foto-container::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: #CCFF33;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
         .foto-container img {
             width: 160px;
             height: 160px;
             border-radius: 50%;
             object-fit: cover;
             border: 6px solid white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(204, 255, 51, 0.3);
             background: white;
+            transition: transform 0.3s ease;
         }
 
-        /* Badge del rol */
+        .foto-container:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Badge del rol minimalista */
         .rol-badge {
             position: absolute;
             bottom: 10px;
             right: -5px;
-            background: #ff6b35;
-            color: white;
+            background: #000000;
+            color: #CCFF33;
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(255,107,53,0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             border: 3px solid white;
         }
 
         /* Contenido del perfil */
         .perfil-content {
-            padding: 100px 30px 40px;
+            padding: 90px 30px 40px;
             text-align: center;
         }
 
         .perfil-content h1 {
             font-size: 32px;
-            color: #2c3e50;
-            margin-bottom: 8px;
+            color: #000000;
+            margin-bottom: 12px;
             font-weight: 700;
         }
 
         .perfil-content .username {
-            color: #95a5a6;
-            font-size: 18px;
+            color: #CCFF33;
+            background: #000000;
+            font-size: 20px;
             margin-bottom: 30px;
-            font-weight: 500;
+            font-weight: 700;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(204, 255, 51, 0.3);
         }
 
         /* Información vertical */
         .info-grid {
             display: grid;
-            grid-template-columns: 1fr; /* una sola columna */
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 16px;
             margin-top: 30px;
         }
 
         .info-item {
-            background: #f8f9fa;
+            background: #ffffff;
             padding: 20px;
             border-radius: 16px;
             text-align: left;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 2px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
         }
 
         .info-item:hover {
-            background: #fff5f2;
-            border-color: #ff6b35;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255,107,53,0.1);
+            background: #ffffff;
+            border-color: #CCFF33;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(204, 255, 51, 0.2);
         }
 
         .info-item-label {
-            color: #ff6b35;
+            color: #666666;
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
@@ -173,17 +199,38 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .info-item:hover .info-item-label {
+            color: #000000;
         }
 
         .info-item-label svg {
             width: 16px;
             height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .info-item:hover .info-item-label svg {
+            transform: scale(1.1);
         }
 
         .info-item-value {
-            color: #2c3e50;
+            color: #000000;
             font-size: 16px;
             font-weight: 600;
+        }
+
+        /* Barra decorativa verde neón en la parte inferior */
+        .perfil-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #CCFF33;
         }
 
         /* Responsive */
@@ -201,11 +248,11 @@
             }
 
             .perfil-header {
-                padding: 40px 20px 100px;
+                padding: 30px 20px 80px;
             }
 
             .perfil-content {
-                padding: 80px 20px 30px;
+                padding: 70px 20px 30px;
             }
 
             .perfil-content h1 {
@@ -219,6 +266,10 @@
 
             .info-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .info-item:hover {
+                transform: translateY(-4px) scale(1.02);
             }
         }
     </style>
@@ -238,9 +289,8 @@
                 {% if perfil.foto %}
                     <img src="{{ perfil.foto.url }}" alt="Foto de {{ perfil.user.get_full_name }}">
                 {% else %}
-                    <img src="https://via.placeholder.com/160/ff6b35/ffffff?text={{ perfil.user.get_full_name|slice:':1' }}" alt="Sin foto">
+                    <img src="https://via.placeholder.com/160/CCFF33/000000?text=" alt="Sin foto">
                 {% endif %}
-                <span class="rol-badge">{{ perfil.rol }}</span>
             </div>
         </div>
 

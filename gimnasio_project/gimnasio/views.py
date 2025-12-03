@@ -292,7 +292,7 @@ class AlternarEstadoMonitorView(View):
 class BorrarMonitorView(View):
     def post(self, request, pk, *args, **kwargs):
         monitor = get_object_or_404(Monitor, pk=pk)
-        nombre = monitor.nombre_completo
+        nombre = monitor.nombre_completo()
         monitor.delete()
         messages.error(request, f"El monitor {nombre} fue eliminado permanentemente.")
         return redirect('gimnasio:gestion_monitores')
