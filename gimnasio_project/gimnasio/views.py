@@ -744,13 +744,10 @@ class NuevoSocioView(View):
 
     def post(self, request):
         import random
-        import string
 
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
         email = request.POST.get('email')
-        telefono = request.POST.get('telefono')
-        dni = request.POST.get('dni')
 
         # Generar username automáticamente
         username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
@@ -762,35 +759,17 @@ class NuevoSocioView(View):
             messages.error(request, 'El email ya está registrado.')
             return render(request, 'gimnasio/nuevo_socio.html')
 
-        # Generar contraseña aleatoria
-        password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-
-        # Crear usuario
-        user = User.objects.create(
+        # Crear usuario (la signal se encargará de crear PerfilUsuario y enviar email)
+        User.objects.create(
             username=username,
             email=email,
-            password=make_password(password_generada),
             first_name=nombre,
             last_name=apellidos
         )
 
-        # Crear perfil de socio
-        PerfilUsuario.objects.create(
-            user=user,
-            telefono=telefono,
-            dni=dni,
-            rol='socio'
-        )
-
-        # Enviar email con credenciales
-        email_enviado = EmailService.enviar_bienvenida_socio(user, password_generada)
-
-        if email_enviado:
-            messages.success(request, f'Socio creado correctamente. Se ha enviado un email con las credenciales.')
-        else:
-            messages.warning(request, f'Socio creado, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
-
+        messages.success(request, 'Socio creado correctamente. Se ha enviado un email con las credenciales.')
         return redirect('gimnasio:gestion_socios')
+
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class DetalleSocioView(View):
