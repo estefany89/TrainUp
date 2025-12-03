@@ -1,0 +1,171 @@
+<!-- rutinas_socio.html -->
+{% extends 'gimnasio/base.html' %}
+
+{% block content %}
+<div id="app">
+    <div class="container mt-4">
+        <h2 class="mb-4">
+            <i class="bi bi-list-check"></i> Rutinas de Ejercicio
+        </h2>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> [[ error ]]
+            <button type="button" class="btn-close" @click="error = ''"></button>
+        </div>
+
+        <!-- Indicador de carga -->
+        <div v-if="cargando" class="text-center mt-5">
+            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3">Cargando rutinas...</p>
+        </div>
+
+        <!-- Debug info -->
+        <div v-if="!cargando" class="alert alert-info">
+            Total de ejercicios cargados: [[ rutinas.length ]]
+        </div>
+
+        <!-- Mensaje cuando no hay rutinas -->
+        <div v-if="!cargando && rutinas.length === 0 && !error" class="alert alert-warning text-center mt-4">
+            <i class="bi bi-info-circle"></i> No se encontraron ejercicios disponibles.
+        </div>
+
+        <!-- Grid de rutinas -->
+        <div v-if="rutinas.length > 0" class="row mt-3">
+            <div class="col-md-6 col-lg-4 mb-4" v-for="(rutina, index) in rutinas" :key="index">
+                <div class="card h-100 shadow-sm hover-card">
+                    <!-- Imagen del ejercicio -->
+                    <div v-if="rutina.image" class="position-relative" style="height: 200px; overflow: hidden;">
+                        <img :src="rutina.image"
+                             class="card-img-top"
+                             :alt="rutina.name"
+                             style="width: 100%; height: 100%; object-fit: cover;"
+                             @error="imageError">
+                    </div>
+                    <div v-else class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title text-success fw-bold">
+                            <i class="bi bi-trophy-fill"></i> [[ rutina.name ]]
+                        </h5>
+                        <div class="card-text small mb-3" v-html="rutina.description"></div>
+
+                        <hr class="my-2">
+
+                        <div class="small">
+                            <p class="mb-2">
+                                <strong><i class="bi bi-tag-fill text-primary"></i> Categoría:</strong>
+                                <span class="badge bg-primary">[[ rutina.category ]]</span>
+                            </p>
+
+                            <p class="mb-2" v-if="rutina.muscles && rutina.muscles.length > 0 && rutina.muscles[0] !== 'No especificado'">
+                                <strong><i class="bi bi-heart-pulse-fill text-danger"></i> Músculos:</strong><br>
+                                <span v-for="(musculo, idx) in rutina.muscles" :key="idx" class="badge bg-danger me-1 mb-1">
+                                    [[ musculo ]]
+                                </span>
+                            </p>
+
+                            <p class="mb-0" v-if="rutina.equipment && rutina.equipment.length > 0 && rutina.equipment[0] !== 'Sin equipo'">
+                                <strong><i class="bi bi-tools text-warning"></i> Equipamiento:</strong><br>
+                                <span v-for="(equipo, idx) in rutina.equipment" :key="idx" class="badge bg-warning text-dark me-1 mb-1">
+                                    [[ equipo ]]
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+console.log('Iniciando Vue.js...');
+
+var app = new Vue({
+    el: '#app',
+    delimiters: ['[[', ']]'],
+    data: {
+        rutinas: [],
+        error: '',
+        cargando: true
+    },
+    methods: {
+        imageError: function(event) {
+            console.log('Error cargando imagen:', event.target.src);
+            event.target.style.display = 'none';
+        }
+    },
+    mounted() {
+        console.log('Vue montado, iniciando fetch...');
+
+        fetch('{% url "gimnasio:api_rutinas" %}')
+            .then(response => {
+                console.log('Response recibida:', response);
+                console.log('Status:', response.status);
+                console.log('OK:', response.ok);
+
+                if (!response.ok) {
+                    throw new Error('Error HTTP: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('===== DATOS RECIBIDOS =====');
+                console.log('Tipo:', typeof data);
+                console.log('Es array:', Array.isArray(data));
+                console.log('Longitud:', data.length);
+                console.log('Datos completos:', data);
+
+                if (data.length > 0) {
+                    console.log('Primer ejercicio:', data[0]);
+                    console.log('Nombre del primer ejercicio:', data[0].name);
+                }
+
+                this.rutinas = data;
+                this.cargando = false;
+
+                console.log('Rutinas asignadas a Vue:', this.rutinas.length);
+                console.log('Estado de Vue.rutinas:', this.rutinas);
+
+                // Forzar actualización
+                this.$forceUpdate();
+            })
+            .catch(err => {
+                console.error('===== ERROR =====');
+                console.error('Error completo:', err);
+                console.error('Mensaje:', err.message);
+                console.error('Stack:', err.stack);
+
+                this.error = 'No se pudieron cargar las rutinas: ' + err.message;
+                this.cargando = false;
+            });
+    }
+});
+
+console.log('Vue instance creada:', app);
+</script>
+
+<style>
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+}
+
+.card-text {
+    max-height: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+{% endblock %}

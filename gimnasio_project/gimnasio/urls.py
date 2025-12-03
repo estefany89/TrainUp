@@ -1,8 +1,7 @@
 from django.urls import path
-from rest_framework.decorators import api_view
-
+from .view_rutinas import RutinasSocioView, RutinasAPI
 from . import views
-from . import autenticacion_views  # NUEVA LÍNEA
+
 app_name = 'gimnasio'
 
 urlpatterns = [
@@ -70,5 +69,12 @@ urlpatterns = [
 
     # ===FACTURA DE PAGOS ===
     path('factura/<int:pk>/', views.GenerarFacturaView.as_view(), name='generar_factura'),
+
+    # ===RUTINAS===
+    # URL que carga la página con Vue.js
+    path('rutinas/', RutinasSocioView.as_view(), name='rutinas_socio'),
+
+    # URL que sirve la API con JSON
+    path('rutinas/api/', RutinasAPI.as_view(), name='api_rutinas'),
 
 ]
