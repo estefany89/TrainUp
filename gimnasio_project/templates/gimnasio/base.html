@@ -28,6 +28,7 @@
         }
 
         body {
+            background-color: #F5F5F5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -44,24 +45,30 @@
             color: white !important;
         }
 
-        .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: all 0.3s;
+        /* Enlaces normales del navbar */
+            .nav-link {
+             color: #004B23 !important; /* Verde oscuro legible sobre fondo brillante */
+             transition: all 0.3s;
         }
 
+        /* Hover de enlaces del navbar */
         .nav-link:hover {
-            color: white !important;
+            color: #38B000 !important; /* Verde medio brillante al pasar el mouse */
             transform: translateY(-2px);
         }
 
-        .dropdown-menu {
-            background-color: white;
+        /* Dropdown items */
+        .dropdown-item {
+            color: #004B23 !important; /* Verde oscuro */
+            transition: all 0.3s;
         }
 
+        /* Hover en dropdown items */
         .dropdown-item:hover {
-            background-color: var(--primary-color);
-            color: white !important;
+            background-color: #70E000; /* Fondo brillante del dropdown */
+            color: #004B23 !important; /* Texto oscuro para contraste */
         }
+
 
         .btn-primary {
             background-color: var(--primary-color);
@@ -114,14 +121,21 @@
             margin: 0 !important;
         }
 
-        footer {
-            background: linear-gradient(135deg, #70E000, #9EF01A);
-            color: #000;
-            padding: 2rem 0;
-            margin-top: 0 !important;
-            border-top: none;
-            box-shadow: 0 -4px 20px rgba(158, 240, 26, 0.3);
-        }
+      footer {
+        background: linear-gradient(135deg, #70E000, #9EF01A);
+        color: #006400; /* Verde oscuro */
+        padding: 2rem 0;
+        margin-top: 0 !important;
+        border-top: none;
+        box-shadow: 0 -4px 20px rgba(158, 240, 26, 0.3);
+    }
+
+        footer p,
+        footer small,
+        footer a {
+            color: #006400 !important;
+    }
+
 
         .dropdown-submenu {
             position: relative;
@@ -137,9 +151,14 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'gimnasio:inicio' %}">
-                <i class="bi bi-heart-pulse-fill"></i> TrainUp
-            </a>
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'gimnasio:inicio' %}">
+    <img src="{% static 'gimnasio/imagenes/logo.png' %}"
+         alt="Logo TrainUp"
+         height="70"
+         width="70"
+         class="me-2"
+         style="filter: brightness(0) invert(1); object-fit: contain;">
+</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
