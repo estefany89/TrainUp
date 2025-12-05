@@ -1,6 +1,5 @@
-from rest_framework.views import APIView
+from rest_framework import generics, serializers, status
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
@@ -10,16 +9,33 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 
+# ---------------- Serializers ----------------
+class RecuperarContrasenaSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class ResetearContrasenaSerializer(serializers.Serializer):
+    password1 = serializers.CharField()
+    password2 = serializers.CharField()
+
+class CambiarContrasenaSerializer(serializers.Serializer):
+    password_actual = serializers.CharField()
+    password_nueva = serializers.CharField()
+    password_confirmar = serializers.CharField()
+
+
 # ---------------- Recuperar contraseña ----------------
-class RecuperarContrasenaAPI(APIView):
+class RecuperarContrasenaAPI(generics.GenericAPIView):
+    serializer_class = RecuperarContrasenaSerializer
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
 
     def get(self, request):
-        # Permite mostrar el formulario en el navegador
         return Response({"email": ""})
 
     def post(self, request):
-        email = request.data.get('email')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
         try:
             user = User.objects.get(email=email)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -37,22 +53,28 @@ class RecuperarContrasenaAPI(APIView):
                 )
             except Exception:
                 print(f'Link de recuperación: {reset_link}')
-
         except User.DoesNotExist:
-            pass  # No revelar si el email existe
+            pass
 
-        return Response({'message': 'Si el email existe, recibirás instrucciones para recuperar tu contraseña.'})
+        return Response({
+            'message': 'Si el email existe, recibirás instrucciones para recuperar tu contraseña.'
+        })
 
 
 # ---------------- Resetear contraseña ----------------
-class ResetearContrasenaAPI(APIView):
+class ResetearContrasenaAPI(generics.GenericAPIView):
+    serializer_class = ResetearContrasenaSerializer
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
 
     def get(self, request, uidb64, token):
-        # Formulario en el navegador
         return Response({"password1": "", "password2": ""})
 
     def post(self, request, uidb64, token):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        password1 = serializer.validated_data['password1']
+        password2 = serializer.validated_data['password2']
+
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -61,9 +83,6 @@ class ResetearContrasenaAPI(APIView):
 
         if not default_token_generator.check_token(user, token):
             return Response({'error': 'Enlace expirado o inválido.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        password1 = request.data.get('password1')
-        password2 = request.data.get('password2')
 
         if password1 != password2:
             return Response({'error': 'Las contraseñas no coinciden.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -76,7 +95,8 @@ class ResetearContrasenaAPI(APIView):
 
 
 # ---------------- Cambiar contraseña (usuario logueado) ----------------
-class CambiarContrasenaAPI(APIView):
+class CambiarContrasenaAPI(generics.GenericAPIView):
+    serializer_class = CambiarContrasenaSerializer
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
     permission_classes = [IsAuthenticated]
 
@@ -88,10 +108,13 @@ class CambiarContrasenaAPI(APIView):
         })
 
     def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         user = request.user
-        password_actual = request.data.get('password_actual')
-        password_nueva = request.data.get('password_nueva')
-        password_confirmar = request.data.get('password_confirmar')
+
+        password_actual = serializer.validated_data['password_actual']
+        password_nueva = serializer.validated_data['password_nueva']
+        password_confirmar = serializer.validated_data['password_confirmar']
 
         if not user.check_password(password_actual):
             return Response({'error': 'Contraseña actual incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)

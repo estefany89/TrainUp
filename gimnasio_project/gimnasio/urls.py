@@ -1,6 +1,7 @@
 from django.urls import path
 from .view_rutinas import RutinasSocioView, RutinasAPI
 from . import views
+from .autenticacion_views import RecuperarContrasenaAPI, ResetearContrasenaAPI, CambiarContrasenaAPI
 
 app_name = 'gimnasio'
 
@@ -11,7 +12,12 @@ urlpatterns = [
     # ===== AUTENTICACIÓN =====
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
-    #path('registro/', views.RegistroView.as_view(), name='registro'),
+    # path('registro/', views.RegistroView.as_view(), name='registro'),
+
+    # Recuperar, resetear y cambiar contraseña
+    path('recuperar-contrasena/', RecuperarContrasenaAPI.as_view(), name='recuperar_contrasena'),
+    path('resetear-contrasena/<str:uidb64>/<str:token>/', ResetearContrasenaAPI.as_view(), name='resetear_contrasena'),
+    path('cambiar-contrasena/', CambiarContrasenaAPI.as_view(), name='cambiar_contrasena'),
 
     # ===== PERFIL USUARIO =====
     path('perfil/', views.PerfilView.as_view(), name='perfil'),
@@ -24,10 +30,7 @@ urlpatterns = [
     path('monitores/<int:pk>/alternar/', views.AlternarEstadoMonitorView.as_view(), name='alternar_monitor'),
     path('monitores/borrar/<int:pk>/', views.BorrarMonitorView.as_view(), name='borrar_monitor'),
 
-
-
     # ===== CLASES =====
-
     path('clases/nueva/', views.NuevaClaseView.as_view(), name='nueva_clase'),
     path('clases/', views.ListadoClasesView.as_view(), name='listado_clases'),
     path('clases/<int:pk>/editar/', views.EditarClaseView.as_view(), name='editar_clase'),
@@ -36,8 +39,6 @@ urlpatterns = [
     # ===== RESERVAS =====
     path('reservas/', views.MisReservasView.as_view(), name='mis_reservas'),
     path('reservas/<int:pk>/cancelar/', views.CancelarReservaView.as_view(), name='cancelar_reserva'),
-
-
 
     # ===== PAGOS =====
     path('pagos/', views.MisPagosView.as_view(), name='mis_pagos'),
@@ -67,14 +68,10 @@ urlpatterns = [
     path('reportes/asistencia/', views.ReporteAsistenciaView.as_view(), name='reporte_asistencia'),
     path('reportes/ingresos/', views.ReporteIngresosView.as_view(), name='reporte_ingresos'),
 
-    # ===FACTURA DE PAGOS ===
+    # === FACTURA DE PAGOS ===
     path('factura/<int:pk>/', views.GenerarFacturaView.as_view(), name='generar_factura'),
 
-    # ===RUTINAS===
-    # URL que carga la página con Vue.js
+    # === RUTINAS ===
     path('rutinas/', RutinasSocioView.as_view(), name='rutinas_socio'),
-
-    # URL que sirve la API con JSON
     path('rutinas/api/', RutinasAPI.as_view(), name='api_rutinas'),
-
 ]

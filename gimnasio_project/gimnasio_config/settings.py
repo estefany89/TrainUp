@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -135,10 +136,12 @@ DEFAULT_FROM_EMAIL = 'noreply@trainupgym.com'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',  # siempre retorna JSON
-        'rest_framework.renderers.BrowsableAPIRenderer',  # interfaz web
-    )
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # <- Esta línea
 }
+
 
 # Configuración de Logging para depuración de emails
 LOGGING = {
@@ -160,4 +163,11 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'TrainUp Gym API',
+    'DESCRIPTION': 'Documentación de la API de TrainUp Gym',
+    'VERSION': '1.0.0',
 }
