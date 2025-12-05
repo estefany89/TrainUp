@@ -7,10 +7,12 @@
         <p class="text-muted">Asistencia y participación en clases</p>
     </div>
 </div>
+
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <!-- Encabezado verde -->
+            <div class="card-header text-white" style="background-color: #38B000;">
                 <h5 class="mb-0">
                     <i class="bi bi-graph-up"></i> Asistencia por Clase
                 </h5>
@@ -19,7 +21,7 @@
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
-                            <tr>
+                            <tr style="background-color: #38B000; color: white;">
                                 <th>Clase</th>
                                 <th>Monitor</th>
                                 <th>Día</th>
@@ -36,7 +38,7 @@
                                 <td>{{ clase.monitor.nombre_completo|default:"Sin monitor" }}</td>
                                 <td>{{ clase.get_dia_semana_display }}</td>
                                 <td>{{ clase.hora_inicio|time:"H:i" }}</td>
-                                <td><span class="badge bg-primary">{{ clase.total_reservas }}</span></td>
+                                <td><span class="badge" style="background-color: #38B000; color: white;">{{ clase.total_reservas }}</span></td>
                                 <td><span class="badge bg-success">{{ clase.total_asistencias }}</span></td>
                                 <td>
                                     {% widthratio clase.total_asistencias clase.total_reservas 100 as porcentaje %}
@@ -71,14 +73,26 @@
         </div>
     </div>
 </div>
-<div class="row mt-4">
+
+<!-- Botones Volver e Imprimir -->
+<div class="row mt-4 no-print">
     <div class="col-12 text-center">
-        <a href="javascript:history.back()" class="btn btn-outline-primary">
+        <a href="javascript:history.back()"
+           class="btn"
+           style="background-color: #38B000; border-color: #38B000; color: white; transition: all 0.3s;"
+           onmouseover="this.style.backgroundColor='#70E000'; this.style.borderColor='#70E000'; this.style.boxShadow='0 0 10px rgba(56, 176, 0, 0.5)';"
+           onmouseout="this.style.backgroundColor='#38B000'; this.style.borderColor='#38B000'; this.style.boxShadow='none';">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
-        <button class="btn btn-success" onclick="window.print()">
+        <button class="btn"
+                style="background-color: #38B000; border-color: #38B000; color: white; transition: all 0.3s;"
+                onmouseover="this.style.backgroundColor='#70E000'; this.style.borderColor='#70E000'; this.style.boxShadow='0 0 10px rgba(56, 176, 0, 0.5)';"
+                onmouseout="this.style.backgroundColor='#38B000'; this.style.borderColor='#38B000'; this.style.boxShadow='none';"
+                onclick="window.print()">
             <i class="bi bi-printer"></i> Imprimir Reporte
         </button>
     </div>
 </div>
+
+
 {% endblock %}

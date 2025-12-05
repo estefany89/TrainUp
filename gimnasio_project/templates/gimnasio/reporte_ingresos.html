@@ -10,7 +10,8 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header bg-success text-white">
+            <!-- Encabezado verde -->
+            <div class="card-header text-white" style="background-color: #38B000;">
                 <h5 class="mb-0">
                     <i class="bi bi-cash-coin"></i> Ingresos por Mes
                 </h5>
@@ -19,7 +20,7 @@
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
+                            <tr style="background-color: #38B000; color: white;">
                                 <th>Mes</th>
                                 <th>Total Ingresos</th>
                                 <th>Gráfico</th>
@@ -29,13 +30,13 @@
                             {% for ingreso in ingresos_por_mes %}
                             <tr>
                                 <td><strong>{{ ingreso.mes }}</strong></td>
-                                <td class="fs-5 text-success">{{ ingreso.total|floatformat:2 }}€</td>
+                                <!-- Números en negro -->
+                                <td class="fs-5" style="color: black;">{{ ingreso.total|floatformat:2 }}€</td>
                                 <td>
                                     {% widthratio ingreso.total 1000 100 as ancho %}
                                     <div class="progress" style="height: 30px;">
-                                        <div class="progress-bar bg-success"
-                                             role="progressbar"
-                                             style="width: {{ ancho|stringformat:'d' }}%"
+                                        <div class="progress-bar" role="progressbar"
+                                             style="width: {{ ancho|stringformat:'d' }}%; background-color: #38B000;"
                                              aria-valuenow="{{ ancho }}"
                                              aria-valuemin="0"
                                              aria-valuemax="100">
@@ -53,10 +54,10 @@
                     </table>
                 </div>
                 {% if ingresos_por_mes %}
-                <div class="alert alert-info mt-3">
+                <div class="alert" style="background-color: #CCFF33; color: #004B23; margin-top:1rem;">
                     <i class="bi bi-info-circle"></i>
                     <strong>Total acumulado (últimos 6 meses):</strong>
-                    <span class="fs-4 text-success">
+                    <span class="fs-4" style="color: #38B000;">
                         {{ total_acumulado|floatformat:2 }}€
                     </span>
                 </div>
@@ -65,14 +66,26 @@
         </div>
     </div>
 </div>
+
+<!-- Botones Volver e Imprimir -->
 <div class="row mt-4">
     <div class="col-12 text-center">
-        <a href="javascript:history.back()" class="btn btn-outline-primary">
+        <a href="javascript:history.back()"
+           class="btn no-print"
+           style="background-color: #38B000; border-color: #38B000; color: white; transition: all 0.3s;"
+           onmouseover="this.style.backgroundColor='#70E000'; this.style.borderColor='#70E000'; this.style.boxShadow='0 0 10px rgba(56, 176, 0, 0.5)';"
+           onmouseout="this.style.backgroundColor='#38B000'; this.style.borderColor='#38B000'; this.style.boxShadow='none';">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
-        <button class="btn btn-success" onclick="window.print()">
+        <button class="btn no-print"
+                style="background-color: #38B000; border-color: #38B000; color: white; transition: all 0.3s;"
+                onmouseover="this.style.backgroundColor='#70E000'; this.style.borderColor='#70E000'; this.style.boxShadow='0 0 10px rgba(56, 176, 0, 0.5)';"
+                onmouseout="this.style.backgroundColor='#38B000'; this.style.borderColor='#38B000'; this.style.boxShadow='none';"
+                onclick="window.print()">
             <i class="bi bi-printer"></i> Imprimir Reporte
         </button>
     </div>
 </div>
+
+
 {% endblock %}

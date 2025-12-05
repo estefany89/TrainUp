@@ -146,10 +146,40 @@
             left: 100%;
             margin-left: 0.1rem;
         }
+
+/* ================= IMPRESIÓN ================= */
+@media print {
+    /* Ocultar navbar y botones */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Quitar márgenes y paddings para que no salga hoja blanca arriba */
+    body, html {
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    main.container, main.my-4 {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Evitar salto de página antes y después del footer */
+    footer {
+        page-break-after: auto;
+    }
+    /*Comentario dirección*/
+    @page {
+        margin: 0.7mm;
+    }
+}
+
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark no-print">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'gimnasio:inicio' %}">
     <img src="{% static 'gimnasio/imagenes/logo.png' %}"
