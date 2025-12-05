@@ -633,7 +633,6 @@ class GenerarFacturaView(View):
         line = Table([['']], colWidths=[6.5 * inch])
         line.setStyle(TableStyle([
             ('LINEABOVE', (0, 0), (-1, 0), 3, colors.HexColor('#70E000')),
-            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#9EF01A')),
         ]))
         elements.append(line)
         elements.append(Spacer(1, 0.3 * inch))
@@ -786,15 +785,6 @@ class GenerarFacturaView(View):
         """
         nota = Paragraph(footer_text, styles['Normal'])
         elements.append(nota)
-
-        elements.append(Spacer(1, 0.3 * inch))
-
-        # Línea final decorativa
-        footer_line = Table([['']], colWidths=[6.5 * inch])
-        footer_line.setStyle(TableStyle([
-            ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor('#70E000')),
-        ]))
-        elements.append(footer_line)
 
         # Construir PDF
         doc.build(elements)
