@@ -27,6 +27,9 @@ from .models import PerfilUsuario, Monitor, Clase, Reserva, Pago
 from .decorators import admin_required, socio_required
 from .email_service import EmailService
 
+from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+
+
 # ============================================
 # AUTENTICACIÓN
 # ============================================
@@ -574,6 +577,10 @@ class GenerarFacturaView(View):
     """Vista para generar y descargar factura en PDF de un pago"""
 
     def get(self, request, pk):
+        from reportlab.platypus import Image
+        from django.conf import settings
+        import os
+
         # Obtener el pago y verificar que pertenece al usuario
         pago = get_object_or_404(Pago, pk=pk, socio=request.user)
 
@@ -584,121 +591,210 @@ class GenerarFacturaView(View):
 
         # Crear el PDF en memoria
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=40,
+            leftMargin=40,
+            topMargin=40,
+            bottomMargin=40
+        )
         elements = []
 
-        # Estilos
+        # Estilos personalizados
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            textColor=colors.HexColor('#FF6B35'),
-            spaceAfter=30,
-            alignment=TA_CENTER
-        )
 
-        # Título
-        elements.append(Paragraph("FACTURA", title_style))
-        elements.append(Spacer(1, 0.3 * inch))
+        # Encabezado con logo y título
+        logo_path = os.path.join(settings.BASE_DIR, 'gimnasio', 'static', 'gimnasio', 'imagenes', 'logo.png')
 
-        # Información del gimnasio
-        gym_info = [
-            ["TrainUp Gym"],
-            ["Calle Fitness, 123"],
-            ["11403 Jerez de la Frontera"],
-            ["CIF: B12345678"],
-            ["Tel: +34 123 456 789"]
-        ]
-        gym_table = Table(gym_info, colWidths=[3 * inch])
-        gym_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),  # Primera fila en negrita
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (0, 0), 12),  # Nombre del gym más grande
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        # Crear tabla de encabezado con logo
+        if os.path.exists(logo_path):
+            logo = Image(logo_path, width=2.5 * inch, height=1 * inch, kind='proportional')
+            titulo = Paragraph("<b><font size=28 color='#004B23'>FACTURA</font></b>",
+                               ParagraphStyle('header', alignment=TA_RIGHT, parent=styles['Normal']))
+            header_data = [[logo, titulo]]
+        else:
+            # Fallback si no encuentra el logo
+            logo_text = Paragraph(
+                "<b><font size=18 color='#004B23'>TrainUp Gym</font></b><br/><font size=9 color='#38B000'>Entrena para superarte</font>",
+                styles['Normal'])
+            titulo = Paragraph("<b><font size=28 color='#004B23'>FACTURA</font></b>",
+                               ParagraphStyle('header', alignment=TA_RIGHT, parent=styles['Normal']))
+            header_data = [[logo_text, titulo]]
+
+        header_table = Table(header_data, colWidths=[3.5 * inch, 3 * inch])
+        header_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
         ]))
-        elements.append(gym_table)
-        elements.append(Spacer(1, 0.3 * inch))
+        elements.append(header_table)
 
-        # Información de la factura
-        factura_data = [
-            ["Número de Factura:", f"FAC-{pago.id:05d}"],
-            ["Fecha de Emisión:", pago.fecha_emision.strftime("%d/%m/%Y")],
-            ["Fecha de Pago:", pago.fecha_pago.strftime("%d/%m/%Y") if pago.fecha_pago else "N/A"],
-        ]
-        factura_table = Table(factura_data, colWidths=[2 * inch, 3 * inch])
-        factura_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        # Línea decorativa verde
+        line = Table([['']], colWidths=[6.5 * inch])
+        line.setStyle(TableStyle([
+            ('LINEABOVE', (0, 0), (-1, 0), 3, colors.HexColor('#70E000')),
+            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#9EF01A')),
         ]))
-        elements.append(factura_table)
+        elements.append(line)
         elements.append(Spacer(1, 0.3 * inch))
 
-        # Información del cliente
-        cliente_info = [
-            ["CLIENTE"],
-            [f"{pago.socio.get_full_name() or pago.socio.username}"],
-            [f"Email: {pago.socio.email}"],
+        # Sección de información en dos columnas
+        info_izq_header = Paragraph("<b><font color='#004B23'>INFORMACIÓN DEL GIMNASIO</font></b>", styles['Normal'])
+        info_izq_data = [
+            ['TrainUp Gym'],
+            ['Calle Fitness, 123'],
+            ['11403 Jerez de la Frontera'],
+            ['Cádiz, España'],
+            [''],
+            [Paragraph('<b>CIF:</b> B12345678', styles['Normal'])],
+            [Paragraph('<b>Tel:</b> +34 123 456 789', styles['Normal'])],
+            [Paragraph('<b>Email:</b> info@trainupgym.es', styles['Normal'])]
         ]
-        cliente_table = Table(cliente_info, colWidths=[5 * inch])
+
+        info_izq_table = Table([[info_izq_header]] + info_izq_data, colWidths=[3 * inch])
+        info_izq_table.setStyle(TableStyle([
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+
+        info_der_header = Paragraph("<b><font color='#004B23'>DETALLES DE FACTURA</font></b>", styles['Normal'])
+        info_der_data = [
+            [''],
+            [Paragraph(f"<b>Nº Factura:</b> FAC-{pago.id:05d}", styles['Normal'])],
+            [Paragraph(f"<b>Fecha Emisión:</b> {pago.fecha_emision.strftime('%d/%m/%Y')}", styles['Normal'])],
+            [Paragraph(f"<b>Fecha Pago:</b> {pago.fecha_pago.strftime('%d/%m/%Y') if pago.fecha_pago else 'Pendiente'}",
+                       styles['Normal'])],
+            [Paragraph("<b>Estado:</b> <font color='#38B000'>PAGADO</font>", styles['Normal'])],
+        ]
+
+        info_der_table = Table([[info_der_header]] + info_der_data, colWidths=[3 * inch])
+        info_der_table.setStyle(TableStyle([
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+
+        info_container = Table([[info_izq_table, info_der_table]], colWidths=[3.2 * inch, 3.3 * inch])
+        info_container.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (0, 0), 10),
+            ('RIGHTPADDING', (1, 0), (1, 0), 10),
+            ('BACKGROUND', (0, 0), (0, 0), colors.HexColor('#F8FFF8')),
+            ('BACKGROUND', (1, 0), (1, 0), colors.HexColor('#F8FFF8')),
+            ('BOX', (0, 0), (0, 0), 1, colors.HexColor('#9EF01A')),
+            ('BOX', (1, 0), (1, 0), 1, colors.HexColor('#9EF01A')),
+        ]))
+
+        elements.append(info_container)
+        elements.append(Spacer(1, 0.4 * inch))
+
+        # Información del cliente con estilo mejorado
+        cliente_header = Paragraph("<b><font color='white' size=11>FACTURADO A</font></b>", styles['Normal'])
+        cliente_header_table = Table([[cliente_header]], colWidths=[6.5 * inch])
+        cliente_header_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#38B000')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(cliente_header_table)
+
+        cliente_body = [
+            [Paragraph(f"<b>{pago.socio.get_full_name() or pago.socio.username}</b>", styles['Normal'])],
+            [Paragraph(f"Email: {pago.socio.email}", styles['Normal'])],
+            [Paragraph(f"Usuario: {pago.socio.username}", styles['Normal'])],
+        ]
+        cliente_table = Table(cliente_body, colWidths=[6.5 * inch])
         cliente_table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F0F0')),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FAFFFE')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#9EF01A')),
         ]))
         elements.append(cliente_table)
-        elements.append(Spacer(1, 0.5 * inch))
+        elements.append(Spacer(1, 0.4 * inch))
 
-        # Detalle del pago
+        # Tabla de conceptos mejorada
         detalle_data = [
-            ["Concepto", "Importe"],
-            [pago.concepto, f"{pago.importe:.2f}€"],
+            [
+                Paragraph("<b><font color='white'>CONCEPTO</font></b>", styles['Normal']),
+                Paragraph("<b><font color='white'>IMPORTE</font></b>",
+                          ParagraphStyle('right', alignment=TA_RIGHT, parent=styles['Normal']))
+            ],
+            [
+                Paragraph(f"<font size=11>{pago.concepto}</font>", styles['Normal']),
+                Paragraph(f"<font size=11><b>{pago.importe:.2f}€</b></font>",
+                          ParagraphStyle('right', alignment=TA_RIGHT, parent=styles['Normal']))
+            ],
         ]
-        detalle_table = Table(detalle_data, colWidths=[4 * inch, 1.5 * inch])
+
+        detalle_table = Table(detalle_data, colWidths=[5 * inch, 1.5 * inch])
         detalle_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FF6B35')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#004B23')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
             ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 11),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('LEFTPADDING', (0, 0), (0, -1), 15),
+            ('RIGHTPADDING', (1, 0), (1, -1), 15),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('TOPPADDING', (0, 1), (-1, -1), 15),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 15),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#9EF01A')),
         ]))
         elements.append(detalle_table)
-        elements.append(Spacer(1, 0.3 * inch))
+        elements.append(Spacer(1, 0.2 * inch))
 
-        # Total
+        # Total con diseño destacado
         total_data = [
-            ["TOTAL", f"{pago.importe:.2f}€"],
+            [
+                Paragraph("<b><font size=13 color='#004B23'>TOTAL A PAGAR</font></b>",
+                          ParagraphStyle('right', alignment=TA_RIGHT, parent=styles['Normal'])),
+                Paragraph(f"<b><font size=16 color='#38B000'>{pago.importe:.2f}€</font></b>",
+                          ParagraphStyle('right', alignment=TA_RIGHT, parent=styles['Normal']))
+            ],
         ]
-        total_table = Table(total_data, colWidths=[4 * inch, 1.5 * inch])
+        total_table = Table(total_data, colWidths=[5 * inch, 1.5 * inch])
         total_table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 14),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#FF6B35')),
-            ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor('#FF6B35')),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0FFF0')),
+            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#70E000')),
         ]))
         elements.append(total_table)
-        elements.append(Spacer(1, 0.5 * inch))
+        elements.append(Spacer(1, 0.6 * inch))
 
-        # Nota de agradecimiento
-        nota = Paragraph(
-            "<i>Gracias por confiar en TrainUp.</i>",
-            ParagraphStyle('nota', alignment=TA_CENTER, fontSize=10, textColor=colors.grey)
-        )
+        # Pie de página mejorado
+        footer_text = """
+        <para alignment='center'>
+            <font size=10 color='#38B000'><b>¡Gracias por confiar en TrainUp Gym!</b></font><br/>
+            <font size=8 color='#666666'>
+                Estamos comprometidos con tu salud y bienestar.<br/>
+                Para cualquier consulta, contáctanos en info@trainupgym.es o llama al +34 123 456 789
+            </font>
+        </para>
+        """
+        nota = Paragraph(footer_text, styles['Normal'])
         elements.append(nota)
+
+        elements.append(Spacer(1, 0.3 * inch))
+
+        # Línea final decorativa
+        footer_line = Table([['']], colWidths=[6.5 * inch])
+        footer_line.setStyle(TableStyle([
+            ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor('#70E000')),
+        ]))
+        elements.append(footer_line)
 
         # Construir PDF
         doc.build(elements)
@@ -709,7 +805,6 @@ class GenerarFacturaView(View):
         response['Content-Disposition'] = f'attachment; filename="Factura_{pago.id}_{pago.socio.username}.pdf"'
 
         return response
-
 
 # ============================================
 # GESTIÓN DE USUARIOS (ADMIN)
