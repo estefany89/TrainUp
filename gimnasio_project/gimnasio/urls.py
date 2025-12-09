@@ -2,6 +2,7 @@ from django.urls import path
 from .view_rutinas import RutinasSocioView, RutinasAPI
 from . import views
 from .autenticacion_views import RecuperarContrasenaAPI, ResetearContrasenaAPI, CambiarContrasenaAPI
+from .view_descuentos import descuentos_view
 
 app_name = 'gimnasio'
 
@@ -74,4 +75,7 @@ urlpatterns = [
     # === RUTINAS ===
     path('rutinas/', RutinasSocioView.as_view(), name='rutinas_socio'),
     path('rutinas/api/', RutinasAPI.as_view(), name='api_rutinas'),
+
+    # === DESCUENTOS ==
+    path('descuentos/', descuentos_view, name='descuentos'),
 ]

@@ -1,0 +1,56 @@
+{% extends 'gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Descuentos - TrainUp{% endblock %}
+
+{% block content %}
+<div class="container my-5" x-data="{ selected: null }">
+    <h2 class="text-center mb-5">Exclusivo para socios TrainUp</h2>
+
+    <div class="row justify-content-center">
+        {% for d in descuentos %}
+        <div class="col-6 col-md-2 text-center mb-3" style="flex: 0 0 20%;">
+            <img src="{% static d.logo %}" alt="{{ d.nombre }}" class="brand-logo mb-2"
+                 @click="selected === {{ forloop.counter }} ? selected = null : selected = {{ forloop.counter }}">
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-3">
+        {% for d in descuentos %}
+        <div x-show="selected === {{ forloop.counter }}" class="card shadow-sm mb-3" x-transition>
+            <div class="card-body text-center">
+                <img src="{% static d.logo %}" alt="{{ d.nombre }}" style="width: 80px; height: auto;" class="mb-3">
+                <h5 class="card-title">{{ d.nombre }}</h5>
+                <p class="card-text">{{ d.descripcion }}</p>
+                <p class="fw-bold">Código: <span class="text-primary">{{ d.codigo }}</span></p>
+                <a href="{{ d.url }}" target="_blank" class="btn btn-success">Ir a {{ d.nombre }}</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.brand-logo {
+    width: 80px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.brand-logo:hover {
+    transform: scale(1.1);
+}
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+{% endblock %}
