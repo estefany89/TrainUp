@@ -22,14 +22,39 @@
 
                     <div class="mb-4">
                         <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <span class="input-group-text" id="togglePassword" style="cursor: pointer; background-color: #fff;">
+                                <i class="bi bi-eye text-secondary"></i>
+                            </span>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Entrar</button>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
+
+<!-- Script para mostrar/ocultar contraseña -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const icon = togglePassword.querySelector('i');
+
+    togglePassword.addEventListener('click', function () {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+});
+</script>
 {% endblock %}
