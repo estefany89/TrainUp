@@ -218,6 +218,7 @@
             <button class="faq-btn" data-target="compromiso">Compromiso Usuario</button>
         </div>
 
+
         <!-- Contenido dinámico -->
         <div id="faq-content" class="text-white text-center fs-5" style="transition: opacity 0.3s;"></div>
     </div>
@@ -325,6 +326,40 @@
         font-weight: bold;
         border-color: #CCFF33;
         box-shadow: 0 0 30px rgba(204, 255, 51, 0.8);
+    }
+
+
+    /* Contenedor del contenido FAQ */
+    #faq-content {
+        max-width: 900px; /* Mismo ancho que los botones */
+        margin: 0 auto;
+        padding: 2rem;
+        text-align: left;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+    }
+
+    /* Para pantallas más pequeñas */
+    @media (max-width: 768px) {
+        #faq-content {
+            max-width: 95%;
+            padding: 1.5rem;
+        }
+    }
+
+    /* Estilo para los párrafos dentro del contenido */
+    #faq-content p {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    #faq-content h4 {
+        margin-bottom: 1.5rem;
+        color: #c4ff0d; /* Color verde lima para los títulos */
+    }
+
+    #faq-content strong {
+        color: #c4ff0d; /* Color verde lima para las preguntas */
     }
 </style>
 
