@@ -12,10 +12,11 @@
 
 <!-- Resumen -->
 {% if total_pendiente > 0 %}
-<div class="alert alert-warning">
+<div class="alert alert-warning" style="background-color: #9EF01A; color: black; border-color: #9EF01A;">
     <h5><i class="bi bi-exclamation-triangle"></i> Tienes pagos pendientes</h5>
     <p class="mb-0">Total pendiente: <strong>{{ total_pendiente|floatformat:2 }}€</strong></p>
 </div>
+
 {% else %}
 <div class="alert alert-success">
     <i class="bi bi-check-circle"></i> ¡Estás al día con tus pagos!

@@ -13,7 +13,7 @@
 <!-- Estadísticas Principales -->
 <div class="row mb-4">
     <div class="col-md-3 mb-3">
-        <div class="card bg-primary text-white">
+        <div class="card" style="background-color: #008000; color: white;">
             <div class="card-body text-center">
                 <i class="bi bi-people-fill" style="font-size: 3rem;"></i>
                 <h2 class="mt-3">{{ total_socios }}</h2>
@@ -22,7 +22,7 @@
         </div>
     </div>
     <div class="col-md-3 mb-3">
-        <div class="card bg-success text-white">
+         <div class="card" style="background-color: #008000; color: white;">
             <div class="card-body text-center">
                 <i class="bi bi-person-badge" style="font-size: 3rem;"></i>
                 <h2 class="mt-3">{{ total_monitores }}</h2>
@@ -31,7 +31,7 @@
         </div>
     </div>
     <div class="col-md-3 mb-3">
-        <div class="card bg-info text-white">
+         <div class="card" style="background-color: #008000; color: white;">
             <div class="card-body text-center">
                 <i class="bi bi-activity" style="font-size: 3rem;"></i>
                 <h2 class="mt-3">{{ total_clases }}</h2>
@@ -40,7 +40,7 @@
         </div>
     </div>
     <div class="col-md-3 mb-3">
-        <div class="card bg-warning text-dark">
+        <div class="card" style="background-color: #008000; color: white;">
             <div class="card-body text-center">
                 <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
                 <h2 class="mt-3">{{ pagos_pendientes }}</h2>
@@ -49,27 +49,29 @@
         </div>
     </div>
 </div>
-
 <!-- Reservas -->
 <div class="row mb-4">
+    <!-- Reservas Hoy -->
     <div class="col-md-6 mb-3">
-        <div class="card border-primary">
-            <div class="card-header bg-primary text-white">
+        <div class="card" style="border: 2px solid #008000;">
+            <div class="card-header text-white" style="background-color: #004B23;">
                 <h5 class="mb-0"><i class="bi bi-calendar-day"></i> Reservas Hoy</h5>
             </div>
             <div class="card-body text-center">
-                <h1 class="display-4 text-primary">{{ reservas_hoy }}</h1>
+                <h1 class="display-4" style="color: #008000;">{{ reservas_hoy }}</h1>
                 <p class="text-muted">Clases reservadas para hoy</p>
             </div>
         </div>
     </div>
+
+    <!-- Reservas Esta Semana -->
     <div class="col-md-6 mb-3">
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
+        <div class="card" style="border: 2px solid #008000;">
+            <div class="card-header text-white" style="background-color: #004B23;">
                 <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Reservas Esta Semana</h5>
             </div>
             <div class="card-body text-center">
-                <h1 class="display-4 text-success">{{ reservas_semana }}</h1>
+                <h1 class="display-4" style="color: #008000;">{{ reservas_semana }}</h1>
                 <p class="text-muted">Clases reservadas próximos 7 días</p>
             </div>
         </div>
@@ -79,12 +81,12 @@
 <!-- Ingresos del Mes -->
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
+        <div class="card" style="border: 2px solid #008000;">
+            <div class="card-header text-white" style="background-color: #004B23;">
                 <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Ingresos del Mes Actual</h5>
             </div>
             <div class="card-body text-center">
-                <h1 class="display-3 text-success">{{ ingresos_mes|floatformat:2 }}€</h1>
+                <h1 class="display-3" style="color: #008000;">{{ ingresos_mes|floatformat:2 }}€</h1>
                 <p class="text-muted">Total de ingresos este mes</p>
             </div>
         </div>
@@ -94,8 +96,8 @@
 <!-- Clases Más Populares -->
 <div class="row">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
+        <div class="card" style="border: 2px solid #008000;">
+            <div class="card-header text-white" style="background-color: #004B23;">
                 <h5 class="mb-0"><i class="bi bi-star-fill"></i> Clases Más Populares</h5>
             </div>
             <div class="card-body">
@@ -125,7 +127,7 @@
                                 </td>
                                 <td><strong>{{ clase.nombre }}</strong></td>
                                 <td>{{ clase.monitor.nombre_completo|default:"Sin monitor" }}</td>
-                                <td><span class="badge bg-primary">{{ clase.num_reservas }} reservas</span></td>
+                                <td><span class="badge" style="background-color: #008000;">{{ clase.num_reservas }} reservas</span></td>
                             </tr>
                             {% empty %}
                             <tr>

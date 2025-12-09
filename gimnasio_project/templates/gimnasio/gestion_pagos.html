@@ -18,7 +18,7 @@
 <!-- Resumen -->
 <div class="row mb-4">
     <div class="col-md-6">
-        <div class="card bg-warning text-dark">
+        <div class="card text-white" style="background-color: #8B0000;">
             <div class="card-body text-center">
                 <i class="bi bi-hourglass-split" style="font-size: 2rem;"></i>
                 <h3 class="mt-2">{{ total_pendiente|floatformat:2 }}€</h3>
@@ -27,7 +27,7 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card bg-success text-white">
+        <div class="card text-white" style="background-color: #008000;">
             <div class="card-body text-center">
                 <i class="bi bi-cash-coin" style="font-size: 2rem;"></i>
                 <h3 class="mt-2">{{ total_mes|floatformat:2 }}€</h3>
@@ -36,6 +36,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Filtros -->
 <div class="card mb-4">
@@ -107,14 +108,18 @@
                         <td>
                             {% if pago.estado == 'pagado' %}
                                 <span class="badge bg-success">Pagado</span>
+
                             {% elif pago.estado == 'pendiente' %}
-                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                <span class="badge bg-danger">Pendiente</span>
+
                             {% elif pago.estado == 'vencido' %}
                                 <span class="badge bg-danger">Vencido</span>
+
                             {% else %}
                                 <span class="badge bg-secondary">{{ pago.get_estado_display }}</span>
                             {% endif %}
                         </td>
+
                         <td>
                             {% if pago.estado == 'pendiente' %}
                                 <button type="button" class="btn btn-sm btn-success"

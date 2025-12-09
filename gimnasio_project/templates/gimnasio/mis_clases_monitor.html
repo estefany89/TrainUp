@@ -14,29 +14,31 @@
     {% for item in clases_con_info %}
     <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100">
-            <div class="card-header bg-primary text-white">
+            <!-- Cabecera verde -->
+            <div class="card-header" style="background-color: #38B000; color: white;">
                 <h5 class="mb-0">{{ item.clase.nombre }}</h5>
             </div>
             <div class="card-body">
                 <p class="card-text">{{ item.clase.descripcion|truncatewords:15 }}</p>
 
                 <div class="mb-2">
-                    <i class="bi bi-calendar text-primary"></i>
+                    <!-- Iconos armonizados: todos en verde oscuro para contraste -->
+                    <i class="bi bi-calendar" style="color: #004B23;"></i>
                     <strong>Día:</strong> {{ item.clase.get_dia_semana_display }}
                 </div>
 
                 <div class="mb-2">
-                    <i class="bi bi-clock text-info"></i>
+                    <i class="bi bi-clock" style="color: #004B23;"></i>
                     <strong>Hora:</strong> {{ item.clase.hora_inicio|time:"H:i" }}
                 </div>
 
                 <div class="mb-2">
-                    <i class="bi bi-hourglass text-warning"></i>
+                    <i class="bi bi-hourglass" style="color: #FFC107;"></i>
                     <strong>Duración:</strong> {{ item.clase.duracion_minutos }} minutos
                 </div>
 
                 <div class="mb-2">
-                    <i class="bi bi-door-open text-secondary"></i>
+                    <i class="bi bi-door-open" style="color: #6c757d;"></i>
                     <strong>Sala:</strong> {{ item.clase.sala|default:"No especificada" }}
                 </div>
 
@@ -54,8 +56,8 @@
                 </div>
             </div>
             <div class="card-footer bg-transparent">
-                <span class="badge bg-info">{{ item.clase.get_nivel_display }}</span>
-                <span class="badge bg-secondary">Capacidad: {{ item.clase.capacidad_maxima }}</span>
+                <span class="badge" style="background-color: #38B000; color: white;">{{ item.clase.get_nivel_display }}</span>
+                <span class="badge" style="background-color: #38B000; color: white;">Capacidad: {{ item.clase.capacidad_maxima }}</span>
             </div>
         </div>
     </div>

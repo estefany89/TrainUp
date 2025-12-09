@@ -1,23 +1,38 @@
 {% extends 'gimnasio/base.html' %}
 
 {% block content %}
+
+<!-- CSS específico para esta página -->
+<style>
+    .th-verde {
+        background-color: #38B000 !important;
+        color: white !important;
+    }
+
+    .btn-verde {
+        background-color: #38B000 !important;
+        border-color: #38B000 !important;
+        color: white !important;
+    }
+</style>
+
 <div class="container my-4">
     <h2 class="text-center mb-4">Listado de Clases</h2>
 
     {% if clases %}
     <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
-            <thead class="table-secondary">
+            <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Día</th>
-                    <th>Hora</th>
-                    <th>Nivel</th>
-                    <th>Monitor</th>
-                    <th>Capacidad</th>
-                    <th>Plazas libres</th>
+                    <th class="th-verde">Nombre</th>
+                    <th class="th-verde">Día</th>
+                    <th class="th-verde">Hora</th>
+                    <th class="th-verde">Nivel</th>
+                    <th class="th-verde">Monitor</th>
+                    <th class="th-verde">Capacidad</th>
+                    <th class="th-verde">Plazas libres</th>
                     {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
-                    <th>Acciones</th>
+                    <th class="th-verde">Acciones</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -40,13 +55,11 @@
                     {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
                     <td>
                         <div class="d-flex gap-1">
-                            <!-- Botón Editar (solo admin) -->
-                            <a href="{% url 'gimnasio:editar_clase' clase.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                            <a href="{% url 'gimnasio:editar_clase' clase.pk %}" class="btn btn-sm btn-verde">Editar</a>
 
-                            <!-- Botón Borrar (solo admin) -->
                             <form method="post" action="{% url 'gimnasio:eliminar_clase' clase.pk %}" onsubmit="return confirm('¿Eliminar esta clase?');">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
+                                <button type="submit" class="btn btn-sm btn-verde">Borrar</button>
                             </form>
                         </div>
                     </td>
