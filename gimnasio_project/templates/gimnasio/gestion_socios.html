@@ -4,6 +4,40 @@
 
 {% block content %}
 
+<style>
+/* Encabezado de la tabla */
+.table-custom-header {
+    background-color: #38B000 !important;
+}
+
+.table-custom-header th {
+    background-color: #38B000 !important;
+    color: white !important;
+}
+
+/* Filas de socios activos */
+.fila-activa {
+    background-color: #f6fff0 !important; /* verde muy suave */
+}
+
+/* Filas de socios inactivos */
+.fila-inactiva {
+    background-color: #d7f5c8 !important; /* verde pastel */
+}
+
+/* Badge Activo */
+.badge-activo {
+    background-color: #38B000 !important;
+    color: white !important;
+}
+
+/* Badge Inactivo */
+.badge-inactivo {
+    background-color: #9e9e9e !important; /* gris suave */
+    color: white !important;
+}
+</style>
+
 <div class="row mb-4">
     <div class="col-md-8">
         <h1><i class="bi bi-people"></i> Gestión de Socios</h1>
@@ -35,8 +69,8 @@
 
 <!-- Tabla de socios -->
 <div class="table-responsive">
-    <table class="table table-striped table-hover align-middle">
-        <thead class="table-dark">
+    <table class="table align-middle">
+        <thead class="table-custom-header">
             <tr>
                 <th>Nombre</th>
                 <th>Email</th>
@@ -47,15 +81,15 @@
         </thead>
         <tbody>
             {% for socio in socios %}
-            <tr class="{% if not socio.activo %}table-secondary{% endif %}">
+            <tr class="{% if socio.activo %}fila-activa{% else %}fila-inactiva{% endif %}">
                 <td>{{ socio.user.get_full_name }}</td>
                 <td>{{ socio.user.email }}</td>
                 <td>{{ socio.dni }}</td>
                 <td>
                     {% if socio.activo %}
-                        <span class="badge bg-success">Activo</span>
+                        <span class="badge badge-activo">Activo</span>
                     {% else %}
-                        <span class="badge bg-dark">Inactivo</span>
+                        <span class="badge badge-inactivo">Inactivo</span>
                     {% endif %}
                 </td>
                 <td class="text-end">
