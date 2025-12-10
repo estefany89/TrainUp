@@ -103,7 +103,7 @@ Desarrollar un sistema web completo que permita la gestión integral de un gimna
 ```bash
 git clone https://github.com/tu-usuario/TrainUp.git
 cd TrainUp.git
-
+```
 
 ### Documentación API
 - [http://localhost:8000/api/schema/](http://localhost:8000/api/schema/)  
