@@ -4,9 +4,6 @@
 {% block main_class %}p-0 fullscreen-black{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-    {{ block.super }}
-{% else %}
 <!-- =======================================
         VIDEO FULLSCREEN
 ======================================= -->
@@ -17,16 +14,34 @@
     </video>
     <div class="overlay position-absolute w-100 h-100"></div>
 
-    <!-- Menú flotante sobre el video -->
-    <div class="top-menu d-flex justify-content-start p-3 position-absolute w-100" style="z-index: 4;">
-        <a href="#faq" class="text-white me-3">FAQ</a>
-        <a href="#contacto" class="text-white">Contacto</a>
+    <!-- Menú flotante sobre el video solo para usuarios NO autenticados -->
+    {% if not user.is_authenticated %}
+    <div class="top-menu d-flex justify-content-between align-items-center p-3 position-absolute w-100" style="z-index: 4;">
+        <div>
+            <a href="#faq" class="text-white me-3">FAQ</a>
+            <a href="#contacto" class="text-white">Contacto</a>
+        </div>
+         <a href="{% url 'gimnasio:login' %}" title="Iniciar Sesión" style="color:white; font-size: 2rem; margin-right: 15px;">
+            <i class="bi bi-box-arrow-in-right"></i>
+        </a>
+
+
     </div>
+    {% endif %}
 
     <!-- Contenido del video -->
     <div class="content position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center text-white" style="top:30%; transform: translateY(-30%);">
+        <img src="{% static 'gimnasio/imagenes/logo.png' %}"
+             alt="Logo TrainUp"
+             class="logo-landing mb-4"
+             style="filter: brightness(0) invert(1); width: 150px; height: 150px; object-fit: contain;">
         <h1 class="display-3 fw-bold">Bienvenido a TrainUp</h1>
         <p class="lead">Entrena para superarte</p>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'gimnasio:login' %}" class="btn btn-primary btn-lg mt-4" style="background: linear-gradient(135deg, #9EF01A, #CCFF33); border: none; color: #000; font-weight: bold; padding: 15px 40px; box-shadow: 0 0 20px rgba(158, 240, 26, 0.5);">
+            Comenzar Ahora
+        </a>
+        {% endif %}
     </div>
 </div>
 
@@ -279,6 +294,23 @@
         font-size: 1.1rem;
     }
 
+    .btn-login {
+        background: linear-gradient(135deg, #9EF01A, #CCFF33);
+        color: #000;
+        font-weight: bold;
+        padding: 10px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s;
+        box-shadow: 0 0 15px rgba(158, 240, 26, 0.4);
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px rgba(204, 255, 51, 0.6);
+        color: #000;
+    }
+
     .advantages .card {
         width:250px;
         background-color: rgba(255,255,255,0.9);
@@ -361,7 +393,24 @@
     #faq-content strong {
         color: #c4ff0d; /* Color verde lima para las preguntas */
     }
+    /* color enlaces del menú superior */
+    .top-menu a {
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1.1rem;
+        transition: color 0.3s, text-shadow 0.3s; /* transición suave */
+    }
+
+    /* Hover: cambia a verde y añade sombra */
+    .top-menu a:hover {
+        color: #CCFF33 !important; /* cambia el color */
+        text-shadow: 0 0 8px #CCFF33, 0 0 15px #9EF01A; /* sombra/neón */
+    }
+
 </style>
 
-{% endif %}
+
+
+</style>
+
 {% endblock %}

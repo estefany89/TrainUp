@@ -176,6 +176,7 @@ class ListadoMonitoresView(ListView):
 
         return queryset.order_by('apellidos', 'nombre')
 
+
 @method_decorator([login_required, admin_required], name='dispatch')
 class GestionMonitoresView(View):
     def get(self, request):
@@ -194,63 +195,71 @@ class GestionMonitoresView(View):
         especialidad = request.POST.get('especialidad')
         biografia = request.POST.get('biografia', '')
 
-        # Validar DNI único
-        if Monitor.objects.filter(dni=dni).exists():
-            messages.error(request, 'Ya existe un monitor con ese DNI.')
-            return redirect('gimnasio:gestion_monitores')
+        try:
+            with transaction.atomic():
+                # Validar DNI único
+                if Monitor.objects.filter(dni=dni).exists():
+                    messages.error(request, 'Ya existe un monitor con ese DNI.')
+                    return redirect('gimnasio:gestion_monitores')
 
-        # Validar email único
-        if Monitor.objects.filter(email=email).exists():
-            messages.error(request, 'Ya existe un monitor con ese email.')
-            return redirect('gimnasio:gestion_monitores')
+                # Validar email único
+                if Monitor.objects.filter(email=email).exists():
+                    messages.error(request, 'Ya existe un monitor con ese email.')
+                    return redirect('gimnasio:gestion_monitores')
 
-        # Crear monitor
-        monitor = Monitor.objects.create(
-            nombre=nombre,
-            apellidos=apellidos,
-            dni=dni,
-            telefono=telefono,
-            email=email,
-            especialidad=especialidad,
-            biografia=biografia
-        )
+                # PRIMERO: Crear monitor
+                monitor = Monitor.objects.create(
+                    nombre=nombre,
+                    apellidos=apellidos,
+                    dni=dni,
+                    telefono=telefono,
+                    email=email,
+                    especialidad=especialidad,
+                    biografia=biografia
+                )
 
-        if request.FILES.get('foto'):
-            monitor.foto = request.FILES['foto']
-            monitor.save()
+                if request.FILES.get('foto'):
+                    monitor.foto = request.FILES['foto']
+                    monitor.save()
 
-        # Crear usuario y perfil para el monitor
-        username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
-        if User.objects.filter(username=username).exists():
-            username = f"{username}{random.randint(1, 999)}"
+                # SEGUNDO: Generar username
+                username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
+                if User.objects.filter(username=username).exists():
+                    username = f"{username}{random.randint(1, 999)}"
 
-        # Generar contraseña aleatoria
-        password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+                # TERCERO: Generar contraseña aleatoria
+                password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
-        user = User.objects.create(
-            username=username,
-            email=email,
-            password=make_password(password_generada),
-            first_name=nombre,
-            last_name=apellidos
-        )
+                # CUARTO: Crear usuario (la señal NO se ejecutará porque el monitor ya existe)
+                user = User.objects.create_user(  # ← Cambio aquí: usar create_user en lugar de create
+                    username=username,
+                    email=email,
+                    password=password_generada,  # ← Cambio aquí: pasar la contraseña sin hashear
+                    first_name=nombre,
+                    last_name=apellidos
+                )
 
-        PerfilUsuario.objects.create(
-            user=user,
-            telefono=telefono,
-            dni=dni,
-            rol='monitor'
-        )
+                # QUINTO: Crear perfil de monitor manualmente (la señal no lo hizo)
+                PerfilUsuario.objects.create(
+                    user=user,
+                    telefono=telefono,
+                    dni=dni,
+                    rol='monitor',
+                    activo=True
+                )
 
-        # Enviar email de bienvenida
-        email_enviado = EmailService.enviar_bienvenida_monitor(monitor, password_generada, username)
+                # SEXTO: Enviar email de bienvenida para monitor
+                email_enviado = EmailService.enviar_bienvenida_monitor(monitor, password_generada, username)
 
-        if email_enviado:
-            messages.success(request,
-                             f'Monitor creado correctamente. Se ha enviado un email a {email} con las credenciales.')
-        else:
-            messages.warning(request,
-                             f'Monitor creado correctamente, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
+                if email_enviado:
+                    messages.success(request,
+                                     f'Monitor creado correctamente. Se ha enviado un email a {email} con las credenciales.')
+                else:
+                    messages.warning(request,
+                                     f'Monitor creado correctamente, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
+
+        except IntegrityError as e:
+            messages.error(request, f'Error al crear el monitor: {str(e)}')
 
         return redirect('gimnasio:gestion_monitores')
 
