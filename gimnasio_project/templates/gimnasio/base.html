@@ -37,12 +37,16 @@
         .navbar {
             background: linear-gradient(135deg, #70E000, #9EF01A);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.25rem 1rem !important;
         }
 
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
             color: white !important;
+            padding: 0rem !important;
+            margin: 0rem !important;
+            line-height: 1;
         }
 
         /* Enlaces normales del navbar */
@@ -179,22 +183,22 @@
     </style>
 </head>
 <body>
+    {% if user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-dark no-print">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'gimnasio:inicio' %}">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'gimnasio:inicio' %}" style="padding: 0; margin: 0;">
     <img src="{% static 'gimnasio/imagenes/logo.png' %}"
          alt="Logo TrainUp"
-         height="70"
-         width="70"
+         height="60"
+         width="100"
          class="me-2"
-         style="filter: brightness(0) invert(1); object-fit: contain;">
-</a>
+         style="filter: brightness(0) invert(1); object-fit: contain; padding: 0; margin: 0; display: block;">
+</a><p style="margin-left: -20px;margin-right: 20px;margin-top:15px;color:white;text-align:center;"><strong>TrainUp</strong><br>Entrena para superarte</p>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'gimnasio:inicio' %}">
                                 <i class="bi bi-house-door"></i> Inicio
@@ -332,13 +336,10 @@
                                 </a>
                             </li>
 
-
-                    {% endif %}
                     {% endif %}
                 </ul>
                  <!-- ========== MENÚ MI PERFIL ========== -->
                 <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
@@ -353,17 +354,11 @@
                                 </a></li>
                             </ul>
                         </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'gimnasio:login' %}">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </a>
-                        </li>
-                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
         <!-- Mensajes de Django como toasts flotantes -->
         <main class="{% block main_class %}container my-4{% endblock %}">
