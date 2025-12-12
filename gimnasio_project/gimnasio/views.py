@@ -176,7 +176,6 @@ class ListadoMonitoresView(ListView):
 
         return queryset.order_by('apellidos', 'nombre')
 
-
 @method_decorator([login_required, admin_required], name='dispatch')
 class GestionMonitoresView(View):
     def get(self, request):
@@ -184,14 +183,18 @@ class GestionMonitoresView(View):
         return render(request, 'gimnasio/gestion_monitores.html', {'monitores': monitores})
 
     def post(self, request):
+
+        # ← SOLUCIÓN: forzar lectura de archivos sin usar print()
+        _ = request.FILES
+
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
         dni = request.POST.get('dni')
         telefono = request.POST.get('telefono')
         email = request.POST.get('email')
         especialidad = request.POST.get('especialidad')
-        username = request.POST.get('username')  # ← NUEVO
-        password = request.POST.get('password')  # ← NUEVO
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
         # Validaciones
         if not username or not password:
@@ -216,7 +219,7 @@ class GestionMonitoresView(View):
                     return redirect('gimnasio:gestion_monitores')
 
                 # PRIMERO: Crear monitor
-                monitor = Monitor.objects.create(
+                monitor = Monitor(
                     nombre=nombre,
                     apellidos=apellidos,
                     dni=dni,
@@ -225,20 +228,22 @@ class GestionMonitoresView(View):
                     especialidad=especialidad
                 )
 
+                # Agregar foto si existe ANTES de guardar
                 if request.FILES.get('foto'):
                     monitor.foto = request.FILES['foto']
-                    monitor.save()
 
-                # SEGUNDO: Crear usuario con la contraseña proporcionada
+                monitor.save()
+
+                # SEGUNDO: Crear usuario
                 user = User.objects.create_user(
                     username=username,
                     email=email,
-                    password=password,  # Django hashea automáticamente con create_user
+                    password=password,
                     first_name=nombre,
                     last_name=apellidos
                 )
 
-                # TERCERO: Crear perfil de monitor manualmente
+                # TERCERO: Crear perfil
                 PerfilUsuario.objects.create(
                     user=user,
                     telefono=telefono,
@@ -247,7 +252,6 @@ class GestionMonitoresView(View):
                     activo=True
                 )
 
-                # Mostrar credenciales en pantalla
                 messages.success(
                     request,
                     f'Monitor creado correctamente. Usuario: {username} | Contraseña: {password}'

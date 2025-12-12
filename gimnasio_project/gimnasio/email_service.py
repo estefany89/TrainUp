@@ -5,12 +5,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class EmailService:
     SENDGRID_API_KEY = config('SENDGRID_API_KEY')
     FROM_EMAIL = config('FROM_EMAIL')
     TEMPLATE_ID_BIENVENIDA_SOCIO = config('TEMPLATE_ID_BIENVENIDA_SOCIO')
-    TEMPLATE_ID_BIENVENIDA_MONITOR = config('TEMPLATE_ID_BIENVENIDA_MONITOR')
 
     def __init__(self, to_email, template_id, template_data=None):
         self.to_email = to_email
@@ -43,7 +41,7 @@ class EmailService:
 
         email_service = cls(
             to_email=user.email,
-            template_id=cls.TEMPLATE_ID_BIENVENIDA_SOCIO,  # Template específico para socios
+            template_id=cls.TEMPLATE_ID_BIENVENIDA_SOCIO,
             template_data={
                 'nombre': user.first_name,
                 'apellidos': user.last_name,
@@ -51,26 +49,6 @@ class EmailService:
                 'password': password_generada,
                 'email': user.email,
                 'tipo_usuario': 'Socio'
-            }
-        )
-        return email_service.send()
-
-    @classmethod
-    def enviar_bienvenida_monitor(cls, monitor, password_generada, username):
-        """Envía email de bienvenida cuando el admin registra un monitor"""
-        logger.info(f'📧 Intentando enviar email de bienvenida a monitor: {monitor.email}')
-
-        email_service = cls(
-            to_email=monitor.email,
-            template_id=cls.TEMPLATE_ID_BIENVENIDA_MONITOR,  # Template específico para monitores
-            template_data={
-                'nombre': monitor.nombre,
-                'apellidos': monitor.apellidos,
-                'username': username,
-                'password': password_generada,
-                'email': monitor.email,
-                'tipo_usuario': 'Monitor',
-                'especialidad': monitor.get_especialidad_display()
             }
         )
         return email_service.send()
