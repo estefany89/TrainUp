@@ -132,41 +132,6 @@
                             {% endif %}
                         </td>
                     </tr>
-
-                    <!-- Modal Marcar como Pagado -->
-                    <div class="modal fade" id="marcarPagadoModal{{ pago.id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Marcar Pago como Pagado</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form method="post" action="{% url 'gimnasio:marcar_pagado' pago.pk %}">
-                                    {% csrf_token %}
-                                    <div class="modal-body">
-                                        <p><strong>Socio:</strong> {{ pago.socio.get_full_name }}</p>
-                                        <p><strong>Concepto:</strong> {{ pago.concepto }}</p>
-                                        <p><strong>Importe:</strong> {{ pago.importe }}€</p>
-
-                                        <div class="mb-3">
-                                            <label for="metodo_pago{{ pago.id }}" class="form-label">Método de Pago *</label>
-                                            <select class="form-select" name="metodo_pago" id="metodo_pago{{ pago.id }}" required>
-                                                <option value="">-- Seleccionar --</option>
-                                                <option value="efectivo">Efectivo</option>
-                                                <option value="tarjeta">Tarjeta</option>
-                                                <option value="transferencia">Transferencia</option>
-                                                <option value="domiciliacion">Domiciliación</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-success">Confirmar Pago</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                     {% empty %}
                     <tr>
                         <td colspan="7" class="text-center text-muted py-4">
@@ -180,4 +145,44 @@
         </div>
     </div>
 </div>
+
+<!-- Modales fuera de la tabla -->
+{% for pago in pagos %}
+    {% if pago.estado == 'pendiente' %}
+    <div class="modal fade" id="marcarPagadoModal{{ pago.id }}" tabindex="-1" aria-labelledby="modalLabel{{ pago.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel{{ pago.id }}">Marcar Pago como Pagado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'gimnasio:marcar_pagado' pago.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p><strong>Socio:</strong> {{ pago.socio.get_full_name }}</p>
+                        <p><strong>Concepto:</strong> {{ pago.concepto }}</p>
+                        <p><strong>Importe:</strong> {{ pago.importe }}€</p>
+
+                        <div class="mb-3">
+                            <label for="metodo_pago{{ pago.id }}" class="form-label">Método de Pago *</label>
+                            <select class="form-select" name="metodo_pago" id="metodo_pago{{ pago.id }}" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="domiciliacion">Domiciliación</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
 {% endblock %}
