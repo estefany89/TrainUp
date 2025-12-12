@@ -184,16 +184,19 @@ class GestionMonitoresView(View):
         return render(request, 'gimnasio/gestion_monitores.html', {'monitores': monitores})
 
     def post(self, request):
-        import random
-        import string
-
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
         dni = request.POST.get('dni')
         telefono = request.POST.get('telefono')
         email = request.POST.get('email')
         especialidad = request.POST.get('especialidad')
-        biografia = request.POST.get('biografia', '')
+        username = request.POST.get('username')  # ← NUEVO
+        password = request.POST.get('password')  # ← NUEVO
+
+        # Validaciones
+        if not username or not password:
+            messages.error(request, 'Debes proporcionar usuario y contraseña.')
+            return redirect('gimnasio:gestion_monitores')
 
         try:
             with transaction.atomic():
@@ -207,6 +210,11 @@ class GestionMonitoresView(View):
                     messages.error(request, 'Ya existe un monitor con ese email.')
                     return redirect('gimnasio:gestion_monitores')
 
+                # Validar username único
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, 'El nombre de usuario ya está en uso.')
+                    return redirect('gimnasio:gestion_monitores')
+
                 # PRIMERO: Crear monitor
                 monitor = Monitor.objects.create(
                     nombre=nombre,
@@ -214,32 +222,23 @@ class GestionMonitoresView(View):
                     dni=dni,
                     telefono=telefono,
                     email=email,
-                    especialidad=especialidad,
-                    biografia=biografia
+                    especialidad=especialidad
                 )
 
                 if request.FILES.get('foto'):
                     monitor.foto = request.FILES['foto']
                     monitor.save()
 
-                # SEGUNDO: Generar username
-                username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
-                if User.objects.filter(username=username).exists():
-                    username = f"{username}{random.randint(1, 999)}"
-
-                # TERCERO: Generar contraseña aleatoria
-                password_generada = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-
-                # CUARTO: Crear usuario (la señal NO se ejecutará porque el monitor ya existe)
-                user = User.objects.create_user(  # ← Cambio aquí: usar create_user en lugar de create
+                # SEGUNDO: Crear usuario con la contraseña proporcionada
+                user = User.objects.create_user(
                     username=username,
                     email=email,
-                    password=password_generada,  # ← Cambio aquí: pasar la contraseña sin hashear
+                    password=password,  # Django hashea automáticamente con create_user
                     first_name=nombre,
                     last_name=apellidos
                 )
 
-                # QUINTO: Crear perfil de monitor manualmente (la señal no lo hizo)
+                # TERCERO: Crear perfil de monitor manualmente
                 PerfilUsuario.objects.create(
                     user=user,
                     telefono=telefono,
@@ -248,15 +247,11 @@ class GestionMonitoresView(View):
                     activo=True
                 )
 
-                # SEXTO: Enviar email de bienvenida para monitor
-                email_enviado = EmailService.enviar_bienvenida_monitor(monitor, password_generada, username)
-
-                if email_enviado:
-                    messages.success(request,
-                                     f'Monitor creado correctamente. Se ha enviado un email a {email} con las credenciales.')
-                else:
-                    messages.warning(request,
-                                     f'Monitor creado correctamente, pero hubo un error al enviar el email. Usuario: {username}, Contraseña: {password_generada}')
+                # Mostrar credenciales en pantalla
+                messages.success(
+                    request,
+                    f'Monitor creado correctamente. Usuario: {username} | Contraseña: {password}'
+                )
 
         except IntegrityError as e:
             messages.error(request, f'Error al crear el monitor: {str(e)}')
@@ -277,7 +272,7 @@ class EditarMonitorView(View):
         monitor.telefono = request.POST.get('telefono')
         monitor.email = request.POST.get('email')
         monitor.especialidad = request.POST.get('especialidad')
-        monitor.biografia = request.POST.get('biografia', '')
+        # biografia eliminado
 
         if request.FILES.get('foto'):
             monitor.foto = request.FILES['foto']
@@ -286,7 +281,6 @@ class EditarMonitorView(View):
 
         messages.success(request, 'Monitor actualizado correctamente.')
         return redirect('gimnasio:gestion_monitores')
-
 
 @method_decorator([login_required, admin_required], name='dispatch')
 class AlternarEstadoMonitorView(View):

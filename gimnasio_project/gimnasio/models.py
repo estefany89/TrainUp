@@ -60,7 +60,7 @@ class Monitor(models.Model):
     especialidad = models.CharField(max_length=20, choices=ESPECIALIDADES)
     fecha_contratacion = models.DateField(default=timezone.now)
     activo = models.BooleanField(default=True)
-    biografia = models.TextField(blank=True)
+    # biografia eliminado
     foto = models.ImageField(upload_to='monitores/', null=True, blank=True)
 
     def __str__(self):

@@ -5,14 +5,14 @@
 {% block content %}
 <style>
 .btn-xs {
-    padding: 0.25rem 0.4rem; /* menos padding */
-    font-size: 0.75rem;       /* tamaño de texto más pequeño */
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
 }
 .card-header, .card-body, .card-footer {
-    padding: 0.25rem 0.5rem; /* padding reducido en toda la tarjeta */
+    padding: 0.25rem 0.5rem;
 }
 .card-img-top {
-    height: 120px;           /* imagen más baja */
+    height: 120px;
     object-fit: cover;
 }
 </style>
@@ -96,7 +96,6 @@
                     <form method="post" action="{% url 'gimnasio:editar_monitor' monitor.pk %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="modal-body">
-                            <!-- Campos Editar -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nombre *</label>
@@ -124,10 +123,6 @@
                                         <option value="{{ value }}" {% if monitor.especialidad == value %}selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Biografía</label>
-                                <textarea class="form-control" name="biografia" rows="3">{{ monitor.biografia }}</textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Foto</label>
@@ -160,14 +155,12 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
            <div class="modal-header text-white" style="background-color: #38B000;">
-
                 <h5 class="modal-title"><i class="bi bi-person-plus-fill"></i> Nuevo Monitor</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <!-- Campos Nuevo Monitor -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nombre *</label>
@@ -191,7 +184,6 @@
                     <div class="mb-3">
                         <label class="form-label">Email *</label>
                         <input type="email" class="form-control" name="email" required>
-                        <small class="text-muted">Se le enviará un correo con sus credenciales de acceso</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Especialidad *</label>
@@ -209,10 +201,24 @@
                             <option value="otra">Otra</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Biografía</label>
-                        <textarea class="form-control" name="biografia" rows="3" placeholder="Breve descripción del monitor..."></textarea>
+
+                    <!-- NUEVOS CAMPOS: Usuario y Contraseña -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Credenciales de acceso:</strong> Define el usuario y contraseña que usará el monitor para acceder al sistema.
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Usuario *</label>
+                            <input type="text" class="form-control" name="username" required placeholder="Ej: juan.perez">
+                            <small class="text-muted">Nombre de usuario para iniciar sesión</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contraseña *</label>
+                            <input type="text" class="form-control" name="password" required placeholder="Mínimo 8 caracteres">
+                            <small class="text-muted">La contraseña que usará para acceder</small>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Foto</label>
                         <input type="file" class="form-control" name="foto" accept="image/*">
@@ -223,7 +229,6 @@
                     <button type="submit" class="btn btn-sm" style="background-color: #38B000; border-color: #38B000; color: white;">
                         <i class="bi bi-check-circle"></i> Crear Monitor
                     </button>
-
                 </div>
             </form>
         </div>
