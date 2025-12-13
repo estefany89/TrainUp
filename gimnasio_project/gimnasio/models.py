@@ -23,7 +23,7 @@ class PerfilUsuario(models.Model):
     direccion = models.CharField(max_length=200, blank=True)
     dni = models.CharField(max_length=20, unique=True, null=True, blank=True)
     foto = models.ImageField(upload_to='usuarios/', null=True, blank=True)
-    rol = models.CharField(max_length=10, choices=ROLES, default='socio')
+    rol = models.CharField(max_length=20, choices=ROLES, default='socio')
     activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
 
