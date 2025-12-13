@@ -1,80 +1,124 @@
-<!-- rutinas_socio.html -->
+<!-- rutinas_socio.html - VERSIÓN MEJORADA -->
 {% extends 'gimnasio/base.html' %}
 
 {% block content %}
 <div id="app">
     <div class="container mt-4">
-        <h2 class="mb-4">
-            <i class="bi bi-list-check"></i> Rutinas de Ejercicio
-        </h2>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="bi bi-list-check text-success"></i> Rutinas de Ejercicio
+            </h2>
+            <div class="badge bg-success fs-6" v-if="!cargando && rutinas.length > 0">
+                [[ rutinas.length ]] ejercicios
+            </div>
+        </div>
 
         <!-- Mensaje de error -->
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i> [[ error ]]
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Error:</strong> [[ error ]]
             <button type="button" class="btn-close" @click="error = ''"></button>
         </div>
 
         <!-- Indicador de carga -->
-        <div v-if="cargando" class="text-center mt-5">
+        <div v-if="cargando" class="text-center mt-5 mb-5">
             <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">Cargando...</span>
             </div>
-            <p class="mt-3">Cargando rutinas...</p>
+            <p class="mt-3 text-muted">Cargando rutinas desde la API...</p>
         </div>
 
-        <!-- Debug info -->
-        <div v-if="!cargando" class="alert alert-info">
-            Total de ejercicios cargados: [[ rutinas.length ]]
+        <!-- Estadísticas (opcional, para debug) -->
+        <div v-if="!cargando && rutinas.length > 0" class="alert alert-info alert-dismissible fade show mb-4">
+            <i class="bi bi-info-circle"></i>
+            <strong>Estadísticas:</strong>
+            <span class="ms-2">
+                Total: [[ rutinas.length ]] |
+                Con imagen: [[ conImagen ]] |
+                Sin imagen: [[ sinImagen ]]
+            </span>
+            <button type="button" class="btn-close" @click="mostrarEstadisticas = false" v-if="mostrarEstadisticas"></button>
         </div>
 
         <!-- Mensaje cuando no hay rutinas -->
         <div v-if="!cargando && rutinas.length === 0 && !error" class="alert alert-warning text-center mt-4">
-            <i class="bi bi-info-circle"></i> No se encontraron ejercicios disponibles.
+            <i class="bi bi-info-circle"></i>
+            No se encontraron ejercicios disponibles en este momento.
         </div>
 
         <!-- Grid de rutinas -->
         <div v-if="rutinas.length > 0" class="row mt-3">
-            <div class="col-md-6 col-lg-4 mb-4" v-for="(rutina, index) in rutinas" :key="index">
+            <div class="col-md-6 col-lg-4 mb-4" v-for="(rutina, index) in rutinas" :key="rutina.id">
                 <div class="card h-100 shadow-sm hover-card">
                     <!-- Imagen del ejercicio -->
-                    <div v-if="rutina.image" class="position-relative" style="height: 200px; overflow: hidden;">
-                        <img :src="rutina.image"
-                             class="card-img-top"
+                    <div class="position-relative" style="height: 200px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <img v-if="rutina.image"
+                             :src="rutina.image"
+                             class="card-img-top exercise-image"
                              :alt="rutina.name"
                              style="width: 100%; height: 100%; object-fit: cover;"
-                             @error="imageError">
-                    </div>
-                    <div v-else class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                             @error="handleImageError($event, index)"
+                             @load="handleImageLoad(index)">
+
+                        <!-- Placeholder cuando no hay imagen o falla -->
+                        <div v-if="!rutina.image || rutina.imageError"
+                             class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
+                            <i class="bi bi-activity" style="font-size: 4rem; opacity: 0.7;"></i>
+                            <p class="mt-2 mb-0 fw-bold text-uppercase" style="font-size: 0.9rem; letter-spacing: 1px;">
+                                [[ rutina.category ]]
+                            </p>
+                        </div>
+
+                        <!-- Badge de categoría sobre la imagen -->
+                        <div v-if="rutina.image && !rutina.imageError"
+                             class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-dark bg-opacity-75">
+                                [[ rutina.category ]]
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="card-body">
-                        <h5 class="card-title text-success fw-bold">
-                            <i class="bi bi-trophy-fill"></i> [[ rutina.name ]]
+                    <div class="card-body d-flex flex-column">
+                        <!-- Título -->
+                        <h5 class="card-title text-success fw-bold mb-3">
+                            <i class="bi bi-trophy-fill"></i>
+                            [[ rutina.name ]]
                         </h5>
-                        <div class="card-text small mb-3" v-html="rutina.description"></div>
+
+                        <!-- Descripción -->
+                        <div class="card-text small mb-3 text-muted flex-grow-1"
+                             v-html="truncateDescription(rutina.description)">
+                        </div>
 
                         <hr class="my-2">
 
+                        <!-- Información adicional -->
                         <div class="small">
-                            <p class="mb-2">
-                                <strong><i class="bi bi-tag-fill text-primary"></i> Categoría:</strong>
-                                <span class="badge bg-primary">[[ rutina.category ]]</span>
-                            </p>
-
-                            <p class="mb-2" v-if="rutina.muscles && rutina.muscles.length > 0 && rutina.muscles[0] !== 'No especificado'">
-                                <strong><i class="bi bi-heart-pulse-fill text-danger"></i> Músculos:</strong><br>
-                                <span v-for="(musculo, idx) in rutina.muscles" :key="idx" class="badge bg-danger me-1 mb-1">
+                            <!-- Músculos -->
+                            <div v-if="rutina.muscles && rutina.muscles.length > 0 && rutina.muscles[0] !== 'No especificado'"
+                                 class="mb-2">
+                                <strong class="d-block mb-1">
+                                    <i class="bi bi-heart-pulse-fill text-danger"></i> Músculos:
+                                </strong>
+                                <span v-for="(musculo, idx) in rutina.muscles"
+                                      :key="'m-'+idx"
+                                      class="badge bg-danger me-1 mb-1">
                                     [[ musculo ]]
                                 </span>
-                            </p>
+                            </div>
 
-                            <p class="mb-0" v-if="rutina.equipment && rutina.equipment.length > 0 && rutina.equipment[0] !== 'Sin equipo'">
-                                <strong><i class="bi bi-tools text-warning"></i> Equipamiento:</strong><br>
-                                <span v-for="(equipo, idx) in rutina.equipment" :key="idx" class="badge bg-warning text-dark me-1 mb-1">
+                            <!-- Equipamiento -->
+                            <div v-if="rutina.equipment && rutina.equipment.length > 0 && rutina.equipment[0] !== 'Sin equipo'">
+                                <strong class="d-block mb-1">
+                                    <i class="bi bi-tools text-warning"></i> Equipamiento:
+                                </strong>
+                                <span v-for="(equipo, idx) in rutina.equipment"
+                                      :key="'e-'+idx"
+                                      class="badge bg-warning text-dark me-1 mb-1">
                                     [[ equipo ]]
                                 </span>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -86,7 +130,7 @@
 <!-- Vue.js -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
-console.log('Iniciando Vue.js...');
+console.log('🚀 Iniciando aplicación Vue.js...');
 
 var app = new Vue({
     el: '#app',
@@ -94,78 +138,156 @@ var app = new Vue({
     data: {
         rutinas: [],
         error: '',
-        cargando: true
+        cargando: true,
+        mostrarEstadisticas: true
+    },
+    computed: {
+        conImagen() {
+            return this.rutinas.filter(r => r.image && !r.imageError).length;
+        },
+        sinImagen() {
+            return this.rutinas.filter(r => !r.image || r.imageError).length;
+        }
     },
     methods: {
-        imageError: function(event) {
-            console.log('Error cargando imagen:', event.target.src);
-            event.target.style.display = 'none';
+        handleImageError(event, index) {
+            console.warn('❌ Error cargando imagen para:', this.rutinas[index].name);
+            // Marcar como error para mostrar placeholder
+            this.$set(this.rutinas[index], 'imageError', true);
+        },
+
+        handleImageLoad(index) {
+            console.log('✅ Imagen cargada correctamente para:', this.rutinas[index].name);
+            this.$set(this.rutinas[index], 'imageError', false);
+        },
+
+        truncateDescription(desc) {
+            if (!desc || desc === 'Sin descripción disponible') {
+                return '<em class="text-muted">Sin descripción disponible</em>';
+            }
+
+            // Eliminar HTML básico y truncar
+            const plainText = desc.replace(/<[^>]*>/g, '');
+            if (plainText.length > 120) {
+                return plainText.substring(0, 120) + '...';
+            }
+            return plainText;
         }
     },
     mounted() {
-        console.log('Vue montado, iniciando fetch...');
+        console.log('📡 Vue montado, iniciando carga de datos...');
 
         fetch('{% url "gimnasio:api_rutinas" %}')
             .then(response => {
-                console.log('Response recibida:', response);
-                console.log('Status:', response.status);
-                console.log('OK:', response.ok);
+                console.log('📥 Respuesta recibida:', {
+                    status: response.status,
+                    ok: response.ok,
+                    statusText: response.statusText
+                });
 
                 if (!response.ok) {
-                    throw new Error('Error HTTP: ' + response.status);
+                    throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('===== DATOS RECIBIDOS =====');
-                console.log('Tipo:', typeof data);
-                console.log('Es array:', Array.isArray(data));
-                console.log('Longitud:', data.length);
-                console.log('Datos completos:', data);
+                console.log('✅ Datos parseados correctamente');
+                console.log('📊 Estadísticas:', {
+                    tipo: typeof data,
+                    esArray: Array.isArray(data),
+                    cantidad: data.length
+                });
 
                 if (data.length > 0) {
-                    console.log('Primer ejercicio:', data[0]);
-                    console.log('Nombre del primer ejercicio:', data[0].name);
+                    console.log('🔍 Muestra del primer ejercicio:', {
+                        nombre: data[0].name,
+                        categoria: data[0].category,
+                        tieneImagen: !!data[0].image,
+                        imagen: data[0].image
+                    });
                 }
 
-                this.rutinas = data;
+                // Asignar datos a Vue
+                this.rutinas = data.map(rutina => ({
+                    ...rutina,
+                    imageError: false  // Inicializar control de error
+                }));
+
                 this.cargando = false;
 
-                console.log('Rutinas asignadas a Vue:', this.rutinas.length);
-                console.log('Estado de Vue.rutinas:', this.rutinas);
+                console.log(`✨ ${this.rutinas.length} rutinas cargadas en Vue`);
 
-                // Forzar actualización
-                this.$forceUpdate();
+                // Contar imágenes
+                const conImagenes = this.rutinas.filter(r => r.image).length;
+                console.log(`🖼️ ${conImagenes} ejercicios con imagen (${((conImagenes/this.rutinas.length)*100).toFixed(1)}%)`);
             })
             .catch(err => {
-                console.error('===== ERROR =====');
-                console.error('Error completo:', err);
-                console.error('Mensaje:', err.message);
-                console.error('Stack:', err.stack);
+                console.error('💥 ERROR FATAL:', {
+                    mensaje: err.message,
+                    stack: err.stack
+                });
 
-                this.error = 'No se pudieron cargar las rutinas: ' + err.message;
+                this.error = `No se pudieron cargar las rutinas: ${err.message}`;
                 this.cargando = false;
             });
     }
 });
 
-console.log('Vue instance creada:', app);
+console.log('✅ Instancia de Vue creada correctamente');
 </script>
 
 <style>
+/* Animación de hover para las cards */
 .hover-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
 }
 
 .hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
 }
 
+/* Animación suave para las imágenes */
+.exercise-image {
+    transition: transform 0.3s ease;
+}
+
+.hover-card:hover .exercise-image {
+    transform: scale(1.05);
+}
+
+/* Mejorar la apariencia del texto truncado */
 .card-text {
-    max-height: 80px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.5;
+}
+
+/* Badges más modernos */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.7em;
+    font-size: 0.85em;
+}
+
+/* Gradiente para placeholder */
+.card-img-top {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
 }
 </style>
 {% endblock %}
