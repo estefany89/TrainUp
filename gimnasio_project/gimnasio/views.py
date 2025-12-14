@@ -195,6 +195,7 @@ class GestionMonitoresView(View):
         especialidad = request.POST.get('especialidad')
         username = request.POST.get('username')
         password = request.POST.get('password')
+        foto = request.FILES['foto']
 
         # Validaciones
         if not username or not password:
@@ -230,7 +231,7 @@ class GestionMonitoresView(View):
 
                 # Agregar foto si existe ANTES de guardar
                 if request.FILES.get('foto'):
-                    monitor.foto = request.FILES['foto']
+                    monitor.foto = foto
 
                 monitor.save()
 
@@ -248,6 +249,7 @@ class GestionMonitoresView(View):
                     user=user,
                     telefono=telefono,
                     dni=dni,
+                    foto=foto,
                     rol='monitor',
                     activo=True
                 )
