@@ -1,6 +1,6 @@
 # TrainUp Gym
 
-## 1. Introducción
+### 1. Introducción
 
 ### Descripción del Proyecto
 TrainUp Gym es una app web que hace fácil la gestión de gimnasios. Socios, monitores y administradores tienen todo lo que necesitan: clases, reservas y pagos, cada uno según su rol.
@@ -43,7 +43,6 @@ Desarrollar un sistema web completo que permita la gestión integral de un gimna
 
 
 ## 2 Medios utilizados
-## Medios utilizados
 
 - **Frontend:** Django templates css + html + Bootstrap + Vue.js/AJAX para interacciones dinámicas en la interfaz.  
 - **Backend:** Django MVC con vistas basadas en clases y funciones auxiliares (`app/` y `gimnasio/` contienen modelos y vistas principales).  
