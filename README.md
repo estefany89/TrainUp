@@ -45,7 +45,7 @@ Desarrollar un sistema web completo que permita la gestión integral de un gimna
 ## 2 Medios utilizados
 
 - **Frontend:** Django templates css + html + Bootstrap + Vue.js/AJAX para interacciones dinámicas en la interfaz.  
-- **Backend:** Django MVC con vistas basadas en clases y funciones auxiliares (`app/` y `gimnasio/` contienen modelos y vistas principales).  
+- **Backend:** Mensajeria Sengrid, Django MVC con vistas basadas en clases y funciones auxiliares (`app/` y `gimnasio/` contienen modelos y vistas principales).  
 - **Base de datos:** PostgreSQL para producción; SQLite (`db.sqlite3`) se utiliza en desarrollo.  
 - **Archivos y medios:**  
   - `media/` → fotos de usuarios y monitores, documentos subidos por socios.  
@@ -156,15 +156,15 @@ git clone https://github.com/tu-usuario/TrainUp.git
 cd TrainUp.git
 ```
 #### 2. Copiar y configurar variables de entorno en .env
-POSTGRES_DB
-POSTGRES_USERs
-POSTGRES_PASSWORD
-POSTGRES_HOST
-POSTGRES_PORT
-DJANGO_SECRET_KEY
-SENDGRID_API_KEY
-FROM_EMAIL
-TEMPLATE_ID_BIENVENIDA_SOCIO
+- POSTGRES_DB
+- POSTGRES_USERs
+- POSTGRES_PASSWORD
+- POSTGRES_HOST
+- POSTGRES_PORT
+- DJANGO_SECRET_KEY
+- SENDGRID_API_KEY
+- FROM_EMAIL
+- TEMPLATE_ID_BIENVENIDA_SOCIO
 #### 3. Levantar servicios:
 ```
 docker-compose up -d
