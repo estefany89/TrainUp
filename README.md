@@ -50,8 +50,7 @@ Desarrollar un sistema web completo que permita la gestión integral de un gimna
 - **Base de datos:** PostgreSQL para producción; SQLite (`db.sqlite3`) se utiliza en desarrollo.  
 - **Archivos y medios:**  
   - `media/` → fotos de usuarios y monitores, documentos subidos por socios.  
-  - `static/` y `staticfiles/` → CSS, JS e imágenes de la interfaz.  
-  - `descargar_imagenes.py` → script auxiliar para manejar imágenes.  
+  - `static/` y `staticfiles/` → CSS, JS e imágenes de la interfaz.   
   - `vockey.pem` → certificado/clave para SSL o seguridad.  
 - **Despliegue:** Docker + Docker Compose (`Dockerfile`, `docker-compose.yml`, `docker-entrypoint.sh`, `deploy.sh`) con Nginx (`nginx.conf`) para desplegar en **AWS**.
 
