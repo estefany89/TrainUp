@@ -188,7 +188,10 @@ docker-compose exec web python manage.py createsuperuser
 6. El admin genera reportes de ingresos y de asistencia para análisis estadístico.  
 
 ### 7. Próximas mejoras
-- Implementación de notificaciones y chat en tiempo real.  
-- Recordatorios automáticos de pagos pendientes.  
+Implementar notificaciones push y en tiempo real
+- Notificar a socios cuando se libera plaza en clase llena
+- Alertar al monitor cuando un socio reserva su clase
+- Recordatorios automáticos de clase 24h antes
+- Notificación cuando se registra un nuevo pago
 - Analice rutinas frecuentes del socio y recomiende ejercicios.
  
