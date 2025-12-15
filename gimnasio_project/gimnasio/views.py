@@ -842,6 +842,8 @@ class NuevoSocioView(View):
         nombre = request.POST.get('nombre')
         apellidos = request.POST.get('apellidos')
         email = request.POST.get('email')
+        dni = request.POST.get('dni')  
+        telefono = request.POST.get('telefono')  
 
         # Generar username automáticamente
         username = f"{nombre.lower()}.{apellidos.lower().split()[0]}"
@@ -853,48 +855,26 @@ class NuevoSocioView(View):
             messages.error(request, 'El email ya está registrado.')
             return render(request, 'gimnasio/nuevo_socio.html')
 
-        # Crear usuario (la signal se encargará de crear PerfilUsuario y enviar email)
-        User.objects.create(
+        # Validar DNI único si se proporciona
+        if dni and PerfilUsuario.objects.filter(dni=dni).exists():
+            messages.error(request, 'El DNI ya está registrado.')
+            return render(request, 'gimnasio/nuevo_socio.html')
+
+        # Crear usuario (la signal creará el PerfilUsuario)
+        user = User.objects.create(
             username=username,
             email=email,
             first_name=nombre,
             last_name=apellidos
         )
 
-        messages.success(request, 'Socio creado correctamente. Se ha enviado un email con las credenciales.')
-        return redirect('gimnasio:gestion_socios')
-
-
-@method_decorator([login_required, admin_required], name='dispatch')
-class DetalleSocioView(View):
-    def get(self, request, pk):
-        perfil = get_object_or_404(PerfilUsuario, pk=pk)
-        return render(request, 'gimnasio/detalle_socio.html', {'perfil': perfil})
-
-    def post(self, request, pk):
-        perfil = get_object_or_404(PerfilUsuario, pk=pk)
-        user = perfil.user
-
-        # Actualizar datos del usuario
-        user.first_name = request.POST.get('nombre')
-        user.last_name = request.POST.get('apellidos')
-        user.email = request.POST.get('email')
-        user.save()
-
-        # Actualizar datos del perfil
-        perfil.telefono = request.POST.get('telefono')
-        perfil.direccion = request.POST.get('direccion')
-
-        # Actualizar campo activo desde el checkbox
-        perfil.activo = 'activo' in request.POST
-
-        # foto
-        if request.FILES.get('foto'):
-            perfil.foto = request.FILES['foto']
-
+        # ← ACTUALIZAR el perfil creado por la signal con DNI y teléfono
+        perfil = user.perfil
+        perfil.dni = dni
+        perfil.telefono = telefono
         perfil.save()
 
-        messages.success(request, 'Usuario actualizado correctamente.')
+        messages.success(request, 'Socio creado correctamente. Se ha enviado un email con las credenciales.')
         return redirect('gimnasio:gestion_socios')
 
 @method_decorator([login_required, admin_required], name='dispatch')
